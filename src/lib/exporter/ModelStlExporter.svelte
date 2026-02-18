@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	// @ts-ignore
-	import stlSerializer from '@jscad/stl-serializer';
+	import * as stlSerializer from '@jscad/stl-serializer';
 	const { serialize, mimeType, fileExtension } = stlSerializer;
 
 	interface ModelStlExporterProps {
@@ -12,13 +12,7 @@
 	let { geometryToRender, fileName = 'model.' + fileExtension }: ModelStlExporterProps = $props();
 
 	const generateMesh = () => {
-		return serialize(
-			{
-				unit: 'millimeter',
-				compress: true
-			},
-			geometryToRender
-		);
+		return serialize({}, geometryToRender);
 	};
 
 	const downloadAsFile = (content: BlobPart[], fileName: string, contentType: string) => {

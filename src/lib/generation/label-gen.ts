@@ -2,6 +2,7 @@
 import * as jscad from '@jscad/modeling';
 const { booleans, colors, extrusions, primitives, transforms, geometries } = jscad;
 import { createText } from './font-utils';
+import { getScrewDriveIcon } from './screw-drive-icon-gen';
 
 
 const x_length = 33.50
@@ -13,8 +14,6 @@ const tab_radius = tab_diameter / 2;
 const segments = 32;
 const label_thickness = 0.6;
 
-// const main_text = "Love Maus□ ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const main_text = "Key Chains";
 const main_text_size = 6.5;
 const main_text_thickness = 0.4;
 
@@ -45,8 +44,10 @@ export const generateLabelGeometry = (
     geometries.geom3.validate(labelBase3D)
 
     const textParts2D = createText(text, overpassRegularFont, main_text_size);
-    const text3D = transforms.translateZ(label_thickness - 0.001, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, textParts2D)));
-    // Geom3.validate(text3D)
+    const text3D = transforms.translateZ(main_text_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, textParts2D)));
 
-    return [labelBase3D, text3D];
+    const icon2D = getScrewDriveIcon("TORX");
+    const icon3D = transforms.translateZ(main_text_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: label_thickness }, icon2D)));
+
+    return [labelBase3D, icon3D];
 }

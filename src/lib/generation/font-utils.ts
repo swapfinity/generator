@@ -6,7 +6,6 @@ import overpassRegularFontUrl from '$lib/assets/Overpass-Regular.ttf?url'
 import overpassBoldFontUrl from '$lib/assets/Overpass-Bold.ttf?url'
 
 import * as jscad from '@jscad/modeling';
-import { center } from './geom2-utils';
 const { transforms, geometries } = jscad;
 
 
@@ -14,15 +13,11 @@ export function createText(text: string, font: any, size = 10, steps = 1) {
     const path = font.getPath(text, 0, 0, size, { kerning: true })
 
     const contours = flattenPath(path)
-    console.log("path: ", path)
-    console.log("contours: ", contours)
     const text2D: Geom2 = polygonFromPoints(contours)
     // convert the coordinates from ttf y to openjscad y
     const text2DYMirrored = transforms.mirrorY(text2D)
 
-    const text2DCentered = center(text2DYMirrored)
-
-    console.log("geoms: ", text2D)
+    const text2DCentered = transforms.center({ axes: [true, true, true] }, (text2DYMirrored))
 
     return text2DCentered
 }

@@ -4,12 +4,14 @@ import type { Geom2 } from '@jscad/modeling/src/geometries/geom2';
 
 import overpassRegularFontUrl from '$lib/assets/Overpass-Regular.ttf?url'
 import overpassBoldFontUrl from '$lib/assets/Overpass-Bold.ttf?url'
+import overpassExtraBoldFontUrl from '$lib/assets/Overpass-ExtraBold.ttf?url'
 
 import * as jscad from '@jscad/modeling';
 const { transforms, geometries } = jscad;
 
 
-export function createText(text: string, font: any, size = 10, steps = 1) {
+export function createText(text: string, font: any, size = 10) {
+
     const path = font.getPath(text, 0, 0, size, { kerning: true })
 
     const contours = flattenPath(path)
@@ -103,4 +105,8 @@ export const loadOverpassRegularFont = async (): Promise<opentype.Font> => {
 
 export const loadOverpassBoldFont = async (): Promise<opentype.Font> => {
     return loadFont(overpassBoldFontUrl)
+}
+
+export const loadOverpassExtraBoldFont = async (): Promise<opentype.Font> => {
+    return loadFont(overpassExtraBoldFontUrl)
 }

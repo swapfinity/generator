@@ -1,6 +1,6 @@
 import type { Geom2 } from '@jscad/modeling/src/geometries/types'
 import * as jscad from '@jscad/modeling';
-const { booleans, transforms, primitives, hulls } = jscad;
+const { booleans, transforms, primitives } = jscad;
 
 export type ScrewDrive = "PH" | "SLOT" | "CROSS" | "SQUARE" | "HEX_SOCKET" | "TORX"
 
@@ -35,7 +35,7 @@ const segments = 64
 const crossBarLength = 6.5
 const barWidth = 1.575
 
-const iconCircleRadius = 4.45
+export const ICON_CIRCLE_RADIUS = 4.45
 const iconCircleWallStrength = 0.45
 
 const squareWidth = 3.6
@@ -51,14 +51,14 @@ const outerLobeCircleRadius = 2.5
 
 // helpers - generate icon functions
 const generateSlotIcon = (): Geom2 => {
-    const horizontalBar = primitives.rectangle({ size: [2 * iconCircleRadius, barWidth] })
+    const horizontalBar = primitives.rectangle({ size: [2 * ICON_CIRCLE_RADIUS, barWidth] })
 
     return removeOutOfCircle(horizontalBar)
 }
 
 const generateCrossIcon = (): Geom2 => {
-    const horizontalBar = primitives.rectangle({ size: [2 * iconCircleRadius, barWidth] })
-    const verticalBar = primitives.rectangle({ size: [barWidth, 2 * iconCircleRadius] })
+    const horizontalBar = primitives.rectangle({ size: [2 * ICON_CIRCLE_RADIUS, barWidth] })
+    const verticalBar = primitives.rectangle({ size: [barWidth, 2 * ICON_CIRCLE_RADIUS] })
 
 
     return removeOutOfCircle(booleans.union(horizontalBar, verticalBar))
@@ -114,8 +114,8 @@ const generateTorxIcon = (): Geom2 => {
 
 // helper - functions
 const addCircle = (icon: Geom2) => {
-    const outerIconCircle = primitives.circle({ radius: iconCircleRadius, segments: segments })
-    const innerIconCircle = primitives.circle({ radius: iconCircleRadius - iconCircleWallStrength, segments: segments })
+    const outerIconCircle = primitives.circle({ radius: ICON_CIRCLE_RADIUS, segments: segments })
+    const innerIconCircle = primitives.circle({ radius: ICON_CIRCLE_RADIUS - iconCircleWallStrength, segments: segments })
 
     const iconCircle = booleans.subtract(outerIconCircle, innerIconCircle)
 
@@ -123,7 +123,7 @@ const addCircle = (icon: Geom2) => {
 }
 
 const removeOutOfCircle = (geometry: Geom2) => {
-    const innerIconCircle = primitives.circle({ radius: iconCircleRadius - iconCircleWallStrength, segments: segments })
+    const innerIconCircle = primitives.circle({ radius: ICON_CIRCLE_RADIUS - iconCircleWallStrength, segments: segments })
 
     return booleans.intersect(geometry, innerIconCircle)
 

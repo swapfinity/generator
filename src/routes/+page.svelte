@@ -1,12 +1,18 @@
 <script lang="ts">
 	import ModelStlExporter from '$lib/exporter/ModelStlExporter.svelte';
-	import { loadOverpassBoldFont, loadOverpassRegularFont } from '$lib/generation/font-utils';
+	import {
+		loadOverpassBoldFont,
+		loadOverpassExtraBoldFont,
+		loadOverpassRegularFont
+	} from '$lib/generation/font-utils';
 	import { generateLabelGeometry } from '$lib/generation/label-gen';
+	import { ScrewLabelSchema } from '$lib/generation/screws/screw-schema';
+	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
 	import ModelViewer from '$lib/viewer/ModelViewer.svelte';
 
 	let text = 'Key Chains';
 	let lastValidText = text;
-	const fontPromise = loadOverpassBoldFont();
+	const fontPromise = loadOverpassExtraBoldFont();
 	$: geometryPromise = fontPromise.then((font) => {
 		let textForLabel: string;
 		if (!text) {
@@ -16,7 +22,7 @@
 			textForLabel = text;
 			lastValidText = text;
 		}
-		return generateLabelGeometry(textForLabel, font);
+		return generateLabelGeometry(textForLabel, font, font);
 	});
 </script>
 
@@ -28,6 +34,7 @@
 		<span aria-busy="true">Loading…</span>
 	{:then geometryToRender}
 		<ModelViewer {geometryToRender} />
+		<SchemaBasedUserInput schema={ScrewLabelSchema} />
 		<ModelStlExporter {geometryToRender} fileName="label.stl" />
 	{/await}
 </main>

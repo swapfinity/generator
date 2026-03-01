@@ -1,14 +1,14 @@
 import type { Geom2 } from "@jscad/modeling/src/geometries/types"
 import * as jscad from '@jscad/modeling';
-import type { ScrewType } from "./screw-schema";
+import type { screwType } from "./screw-schema";
 const { booleans, transforms, primitives, utils, expansions, hulls } = jscad;
 
 
-export const getScrewTypeIcon = (screwType: ScrewType): Geom2 => {
+export const getScrewTypeIcon = (screwType: screwType): Geom2 => {
     return getIconForScrewType(screwType)
 }
 
-const getIconForScrewType = (screwType: ScrewType): Geom2 => {
+const getIconForScrewType = (screwType: screwType): Geom2 => {
     switch (screwType) {
         case "FLAT_HEAD":
             return generateFlatHeadIcon()

@@ -70,10 +70,6 @@ const createLabelBase3D = (): Geom3 => {
 }
 
 type ScrewLabelDefinition = { type: "SCREW", screwDrive: ScrewDrive, screwDriveText: string | null, screwType: ScrewType, screwTypeText: string | null }
-type PlainTextLabelDefinition = { type: "PLAIN_TEXT", text: string }
-type LabelDefinition =
-    | PlainTextLabelDefinition
-    | ScrewLabelDefinition
 
 const createScrewDriveTextAndIcon = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
     const withScrewDriveText = Boolean(labelDefinition.screwDriveText)

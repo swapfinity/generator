@@ -5,6 +5,8 @@ export type BaseInput = {
     optional: boolean,
     nullable: boolean,
     default: any
+    rowName?: string,
+    rowWeight?: number
 }
 
 export type TextInput = BaseInput & {
@@ -27,3 +29,5 @@ export type BooleanInput = BaseInput & {
 
 
 export type InputDefinition = TextInput | EnumInput | BooleanInput
+
+export type GroupedInputs = Record<string, InputDefinition[]>;

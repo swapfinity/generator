@@ -4,7 +4,8 @@ const { booleans, colors, extrusions, primitives, transforms, geometries } = jsc
 import { createText } from './font-utils';
 import { getScrewDriveIcon, ICON_CIRCLE_RADIUS, type ScrewDrive } from './screws/screw-drive-icon-gen';
 import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
-import { getScrewTypeIcon, SCREW_WIDTH, type ScrewType } from './screws/screw-type-icon-gen';
+import { getScrewTypeIcon } from './screws/screw-type-icon-gen';
+import type { LabelDefinition } from './screws/screw-schema';
 
 
 const x_length = 33.50
@@ -20,23 +21,26 @@ const main_text_size = 6.5;
 const main_text_thickness = 0.4;
 
 export const generateLabelGeometry = (
-    text: string,
-    overpassRegularFont: any,
+    labelDefinition: LabelDefinition,
+    overpassRegularFont: opentype.Font,
     boldFont: opentype.Font
 ) => {
     const labelBase3D = createLabelBase3D();
 
-    const labelDefinition: ScrewLabelDefinition = { type: "SCREW", screwDrive: "TORX", screwDriveText: "T20", screwType: "FLAT_HEAD", screwTypeText: "M4x10" }
+    switch (labelDefinition.type) {
+        case "SCREW": {
+            const iconAndText2D = booleans.union(
+                createScrewDriveTextAndIcon(labelDefinition, boldFont),
+                createScrewTypeTextAndIcon(labelDefinition, boldFont)
+            )
+            const iconandText3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, iconAndText2D)));
+            return [labelBase3D, iconandText3D];
+        }
 
-    const iconAndText2D = booleans.union(
-        createScrewDriveTextAndIcon(labelDefinition, boldFont),
-        createScrewTypeTextAndIcon(labelDefinition, boldFont)
-    )
-    const iconandText3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, iconAndText2D)));
-
-    return [labelBase3D, iconandText3D];
-
-
+        case "PLAIN_TEXT": {
+            return [labelBase3D]
+        }
+    }
 }
 
 // helpers

@@ -5,7 +5,7 @@ import { createText } from './font-utils';
 import { getScrewDriveIcon, ICON_CIRCLE_RADIUS, type ScrewDrive } from './screws/screw-drive-icon-gen';
 import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
 import { getScrewTypeIcon } from './screws/screw-type-icon-gen';
-import type { LabelDefinition } from './screws/screw-schema';
+import type { LabelDefinition, ScrewLabelDefinition } from './screws/screw-schema';
 
 
 const x_length = 33.50
@@ -31,14 +31,21 @@ export const generateLabelGeometry = (
         case "SCREW": {
             const iconAndText2D = booleans.union(
                 createScrewDriveTextAndIcon(labelDefinition, boldFont),
-                createScrewTypeTextAndIcon(labelDefinition, boldFont)
+                createScrewTypeIconAndMainText(labelDefinition, boldFont)
             )
             const iconandText3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, iconAndText2D)));
             return [labelBase3D, iconandText3D];
         }
 
         case "PLAIN_TEXT": {
-            return [labelBase3D]
+            if (!labelDefinition.text) {
+                return [labelBase3D]
+            }
+
+            const text2D = createText(labelDefinition.text, overpassRegularFont, main_text_size)
+            const text3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, text2D)));
+
+            return [labelBase3D, text3D]
         }
     }
 }
@@ -73,8 +80,6 @@ const createLabelBase3D = (): Geom3 => {
     return labelBase3D;
 }
 
-type ScrewLabelDefinition = { type: "SCREW", screwDrive: ScrewDrive, screwDriveText: string | null, screwType: ScrewType, screwTypeText: string | null }
-
 const createScrewDriveTextAndIcon = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
     const withScrewDriveText = Boolean(labelDefinition.screwDriveText)
     const centerForIcon = getCenterForScrewDriveIcon(withScrewDriveText)
@@ -102,13 +107,13 @@ const getCenterForScrewDriveIcon = (withText: boolean): [number, number, number]
     }
 }
 
-const createScrewTypeTextAndIcon = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
-    const withScrewTypeText = Boolean(labelDefinition.screwTypeText)
+const createScrewTypeIconAndMainText = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
+    const withScrewTypeText = Boolean(labelDefinition.screwMainText)
     const centerForIcon = getCenterForScrewTypeIcon(withScrewTypeText)
     const icon = transforms.translate(centerForIcon, getScrewTypeIcon(labelDefinition.screwType))
 
     if (withScrewTypeText) {
-        const screwTypeText2D = transforms.translate([x_length / 2 - x_length / 3, -(y_length / 2 - y_length / 4), 0], createText(labelDefinition.screwTypeText!, boldFont, screwTypeTextSize))
+        const screwTypeText2D = transforms.translate([x_length / 2 - x_length / 3, -(y_length / 2 - y_length / 4), 0], createText(labelDefinition.screwMainText, boldFont, screwTypeTextSize))
         return booleans.union(icon, screwTypeText2D)
 
     }

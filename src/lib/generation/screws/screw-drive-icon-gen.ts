@@ -1,8 +1,7 @@
 import type { Geom2 } from '@jscad/modeling/src/geometries/types'
 import * as jscad from '@jscad/modeling';
+import type { ScrewDrive } from './screw-schema';
 const { booleans, transforms, primitives } = jscad;
-
-export type ScrewDrive = "PH" | "SLOT" | "CROSS" | "SQUARE" | "HEX_SOCKET" | "TORX"
 
 
 export const getScrewDriveIcon = (screwDrive: ScrewDrive): Geom2 => {

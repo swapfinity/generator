@@ -25,7 +25,7 @@
 
 <main class="container">
 	<h1>Swapfinity Label Generator</h1>
-	<p>Generate a custom label fitting your needs.</p>
+	<p>Create any custom label you need.</p>
 	{#await geometryPromise}
 		<span aria-busy="true">Loading…</span>
 	{:then geometryToRender}

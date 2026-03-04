@@ -71,7 +71,7 @@
 					} else if (value instanceof z.ZodType) {
 						const baseInput: BaseInput = {
 							fieldName: key,
-							viewName: (meta?.viewName as string) ?? key, //TODO doesnt work yet
+							viewName: (meta?.viewName as string) ?? key,
 							description: meta?.description,
 							optional: optional,
 							nullable: nullable,

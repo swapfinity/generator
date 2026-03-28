@@ -1,0 +1,18 @@
+<div class="header-container">
+	<div class="highlight logo">Swapfinity Label Generator</div>
+</div>
+
+<style lang="scss">
+	.header-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+	}
+
+	.logo {
+		font-size: 2rem;
+		font-weight: bold;
+		padding: 0.5rem 0;
+	}
+</style>

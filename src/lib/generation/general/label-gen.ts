@@ -2,10 +2,11 @@
 import * as jscad from '@jscad/modeling';
 const { booleans, colors, extrusions, primitives, transforms, geometries } = jscad;
 import { createText } from './font-utils';
-import { getScrewDriveIcon, ICON_CIRCLE_RADIUS, type ScrewDrive } from './screws/screw-drive-icon-gen';
+import { getScrewDriveIcon, ICON_CIRCLE_RADIUS } from '../screws/screw-drive-icon-gen';
 import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
-import { getScrewTypeIcon } from './screws/screw-type-icon-gen';
-import type { LabelDefinition, ScrewLabelDefinition } from './screws/screw-schema';
+import { getScrewTypeIcon } from '../screws/screw-type-icon-gen';
+import type { LabelDefinition } from '../../input/schemas/general-schemas';
+import type { ScrewLabelDefinition } from '$lib/input/schemas/screw-schema';
 
 
 const x_length = 33.50

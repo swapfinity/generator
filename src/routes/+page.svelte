@@ -4,16 +4,15 @@
 		loadOverpassBoldFont,
 		loadOverpassExtraBoldFont,
 		loadOverpassRegularFont
-	} from '$lib/generation/font-utils';
-	import { generateLabelGeometry } from '$lib/generation/label-gen';
-	import type { LabelDefinition } from '$lib/generation/screws/screw-schema';
+	} from '$lib/generation/general/font-utils';
+	import { generateLabelGeometry } from '$lib/generation/general/label-gen';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
+	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
 	import ModelViewer from '$lib/viewer/ModelViewer.svelte';
 
 	let geometryPromise = $state<Promise<any> | null>(null);
 	const fontPromise = loadOverpassExtraBoldFont();
 	const handleFormChange = (updated: LabelDefinition) => {
-		console.log('UPDATE2: ', updated);
 		geometryPromise = fontPromise
 			.then((font) => generateLabelGeometry(updated, font, font))
 			.catch((err) => {
@@ -23,14 +22,10 @@
 	};
 </script>
 
-<main class="container">
-	<h1>Swapfinity Label Generator</h1>
-	<p>Create any custom label you need.</p>
-	{#await geometryPromise}
-		<span aria-busy="true">Loading…</span>
-	{:then geometryToRender}
-		<ModelViewer {geometryToRender} />
-		<ModelStlExporter {geometryToRender} fileName="label.stl" />
-	{/await}
-	<SchemaBasedUserInput onChange={handleFormChange} />
-</main>
+{#await geometryPromise}
+	<span aria-busy="true">Loading…</span>
+{:then geometryToRender}
+	<ModelViewer {geometryToRender} />
+	<ModelStlExporter {geometryToRender} fileName="label.stl" />
+{/await}
+<SchemaBasedUserInput onChange={handleFormChange} />

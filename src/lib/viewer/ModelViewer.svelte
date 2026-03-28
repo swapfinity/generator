@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	// props
 	interface ModelViewerProps {
@@ -9,6 +9,7 @@
 	let { geometryToRender }: ModelViewerProps = $props();
 
 	let containerElement: HTMLDivElement;
+	let resizeObserver: ResizeObserver;
 
 	onMount(async () => {
 		if (!containerElement) {
@@ -136,7 +137,24 @@
 			zoomDelta += ev.deltaY;
 		};
 
+		resizeObserver = new ResizeObserver((entries) => {
+			console.log('resize', entries[0].contentRect);
+			perspectiveCamera.setProjection(camera, camera, {
+				width: containerElement.clientWidth,
+				height: containerElement.clientHeight
+			});
+
+			perspectiveCamera.update(camera);
+			renderer(renderOptions);
+		});
+
+		resizeObserver.observe(containerElement);
+
 		window.requestAnimationFrame(updateAndRender);
+	});
+
+	onDestroy(() => {
+		resizeObserver?.disconnect();
 	});
 </script>
 

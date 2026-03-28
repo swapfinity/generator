@@ -1,6 +1,6 @@
 import type { Geom2 } from '@jscad/modeling/src/geometries/types'
 import * as jscad from '@jscad/modeling';
-import type { ScrewDrive } from './screw-schema';
+import type { ScrewDrive } from '$lib/input/schemas/screw-schema';
 const { booleans, transforms, primitives } = jscad;
 
 

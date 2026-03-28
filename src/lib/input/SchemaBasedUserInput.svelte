@@ -1,7 +1,7 @@
 <script lang="ts">
 	import z from 'zod';
 	import type { BaseInput, GroupedInputs, InputDefinition } from './input-types';
-	import { LABEL_SCHEMA_MAP, type LabelDefinition } from '$lib/generation/screws/screw-schema';
+	import { LABEL_SCHEMA_MAP, type LabelDefinition } from './schemas/general-schemas';
 
 	interface SchemaBasedUserInputProps {
 		onChange: (updated: LabelDefinition) => void;

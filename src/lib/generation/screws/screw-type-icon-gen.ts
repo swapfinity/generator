@@ -1,7 +1,7 @@
 import type { Geom2 } from "@jscad/modeling/src/geometries/types"
 import * as jscad from '@jscad/modeling';
-import type { ScrewType } from "./screw-schema";
-import { flatArc } from "../geom-utils";
+import { flatArc } from "../general/geom-utils";
+import type { ScrewType } from "$lib/input/schemas/screw-schema";
 const { booleans, transforms, primitives, utils, expansions, hulls } = jscad;
 
 
@@ -74,7 +74,7 @@ const generateRoundHeadIcon = (): Geom2 => {
             )
         )
     )
-    const repositionedScrewHead = transforms.translateX(-(SCREW_SHANK_LENGTH / 2 - ROUND_HEAD_HEAD_RADIUS + 0.3), screwHead)
+    const repositionedScrewHead = transforms.translateX(-(SCREW_SHANK_LENGTH / 2 - ROUND_HEAD_HEAD_RADIUS + 0.6), screwHead)
 
 
     return booleans.union(repositionedScrewHead, screwShank)
@@ -86,10 +86,10 @@ const generatePanHeadIcon = (): Geom2 => {
     const fullHeadHeightOffset = PAN_HEAD_HEAD_HEIGHT / 2 + PAN_HEAD_HEAD_ARC_HEIGHT / 2
     const screwHeadTop = flatArc(PAN_HEAD_HEAD_WIDTH, PAN_HEAD_HEAD_ARC_HEIGHT, segments)
     const rotatedScrewAndRepositionedHeadTop = transforms.translateX(
-        -(SCREW_SHANK_LENGTH / 2), transforms.rotateZ(utils.degToRad(90), screwHeadTop)
+        -(SCREW_SHANK_LENGTH / 2 - 0.3), transforms.rotateZ(utils.degToRad(90), screwHeadTop)
     )
     const screwHeadMain = primitives.rectangle({ size: [PAN_HEAD_HEAD_HEIGHT, PAN_HEAD_HEAD_WIDTH] })
-    const repositionedScrewHeadMain = transforms.translateX(-(SCREW_SHANK_LENGTH / 2 - fullHeadHeightOffset), screwHeadMain)
+    const repositionedScrewHeadMain = transforms.translateX(-(SCREW_SHANK_LENGTH / 2 - fullHeadHeightOffset - 0.3), screwHeadMain)
 
     const fullHead = expansions.offset(
         { delta: PAN_HEAD_HEAD_ROUNDING, corners: "round", segments: segments },

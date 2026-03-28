@@ -13,9 +13,9 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="container-fluid app">
+<div class="app">
 	<Header />
-	<main>
+	<main style="min-height: 0;">
 		{@render children()}
 	</main>
 	<Footer />
@@ -24,7 +24,8 @@
 <style lang="scss">
 	.app {
 		display: grid;
-		height: 100vh;
+		height: 100dvh;
+		padding: calc(var(--pico-spacing) / 2) var(--pico-spacing);
 		grid-template-rows: auto 1fr auto;
 	}
 </style>

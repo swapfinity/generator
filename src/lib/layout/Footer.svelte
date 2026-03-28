@@ -37,7 +37,7 @@
 	.link-container {
 		margin-right: 2rem;
 		margin-left: 2rem;
-		padding: 0.75rem 0;
+		padding: 0.5rem 0;
 
 		a + a {
 			margin-left: var(--pico-spacing);

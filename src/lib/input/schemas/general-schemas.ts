@@ -4,7 +4,7 @@ import { ScrewLabelSchema } from "./screw-schema";
 // schemas
 export const PlainTextLabelSchema = z.object({
     type: z.literal("PLAIN_TEXT").default("PLAIN_TEXT"),
-    text: z.string().default(""),
+    text: z.string().default("Label Text").meta({ viewName: "Text" })
 });
 
 // when adding schemas to the map, make sure to add them to the LabelDefinitionSchema type as well

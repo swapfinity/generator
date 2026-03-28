@@ -110,3 +110,9 @@ export const loadOverpassBoldFont = async (): Promise<opentype.Font> => {
 export const loadOverpassExtraBoldFont = async (): Promise<opentype.Font> => {
     return loadFont(overpassExtraBoldFontUrl)
 }
+
+export interface Fonts {
+    regular: opentype.Font
+    bold: opentype.Font
+    extraBold: opentype.Font
+}

@@ -13,13 +13,13 @@ const screwType = z
 const screwDriveText = z
     .string()
     .default("")
-    .meta({ viewName: "Screw Drive Description Text (Optional)", rowWeight: 5, rowName: "screwDrive" })
+    .meta({ viewName: "Screw Drive Description Text (Optional)", rowWeight: 2, rowName: "screwDrive" })
     .describe("The text specifying the drive type of the screw.")
 
 const screwHeadTypeText = z
     .string()
     .default("")
-    .meta({ viewName: "Screw Description Text (Optional)", rowWeight: 5, rowName: "screwType" })
+    .meta({ viewName: "Screw Description Text (Optional)", rowWeight: 2, rowName: "screwType" })
     .describe("The main text describing the screw.")
 
 
@@ -36,5 +36,3 @@ export type ScrewDrive = z.infer<typeof screwDrive>
 export type ScrewType = z.infer<typeof screwType>
 
 export type ScrewLabelDefinition = z.infer<typeof ScrewLabelSchema>
-
-// TODO move to input folder

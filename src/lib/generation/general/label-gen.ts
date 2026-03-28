@@ -1,7 +1,7 @@
 
 import * as jscad from '@jscad/modeling';
 const { booleans, colors, extrusions, primitives, transforms, geometries } = jscad;
-import { createText } from './font-utils';
+import { createText, type Fonts } from './font-utils';
 import { getScrewDriveIcon, ICON_CIRCLE_RADIUS } from '../screws/screw-drive-icon-gen';
 import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
 import { getScrewTypeIcon } from '../screws/screw-type-icon-gen';
@@ -23,16 +23,15 @@ const main_text_thickness = 0.4;
 
 export const generateLabelGeometry = (
     labelDefinition: LabelDefinition,
-    overpassRegularFont: opentype.Font,
-    boldFont: opentype.Font
+    fonts: Fonts
 ) => {
     const labelBase3D = createLabelBase3D();
 
     switch (labelDefinition.type) {
         case "SCREW": {
             const iconAndText2D = booleans.union(
-                createScrewDriveTextAndIcon(labelDefinition, boldFont),
-                createScrewTypeIconAndMainText(labelDefinition, boldFont)
+                createScrewDriveTextAndIcon(labelDefinition, fonts.extraBold),
+                createScrewTypeIconAndMainText(labelDefinition, fonts.extraBold)
             )
             const iconandText3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, iconAndText2D)));
             return [labelBase3D, iconandText3D];
@@ -43,7 +42,7 @@ export const generateLabelGeometry = (
                 return [labelBase3D]
             }
 
-            const text2D = createText(labelDefinition.text, overpassRegularFont, main_text_size)
+            const text2D = createText(labelDefinition.text, fonts.regular, main_text_size)
             const text3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, text2D)));
 
             return [labelBase3D, text3D]

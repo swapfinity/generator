@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
+	import { Download } from 'lucide-svelte';
 	// @ts-ignore
 	import * as stlSerializer from '@jscad/stl-serializer';
 	const { serialize, mimeType, fileExtension } = stlSerializer;
 
 	interface ModelStlExporterProps {
-		geometryToRender: Geom3 | Geom3[];
+		geometryToRender: Geom3 | Geom3[] | null;
 		fileName: string | undefined;
 	} //TODO error if fileName doesnt end on fileExtension
 
@@ -39,4 +40,10 @@
 	};
 </script>
 
-<button onclick={handleButtonClick}>Download as STL</button>
+<button onclick={handleButtonClick} disabled={!geometryToRender} style="width: 100%">
+	{#if geometryToRender}
+		<Download /> Download as STL
+	{:else}
+		<span aria-busy="true"></span>
+	{/if}
+</button>

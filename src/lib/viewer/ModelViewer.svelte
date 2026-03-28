@@ -11,6 +11,17 @@
 	let containerElement: HTMLDivElement;
 	let resizeObserver: ResizeObserver;
 
+	let rendererFunction: any = null;
+	let renderOptions: any = null;
+	let entitiesFromSolidsFunction: any = null;
+	let ready = $state(false);
+	$effect(() => {
+		if (!ready) return;
+		const newEntities = entitiesFromSolidsFunction({}, geometryToRender);
+		renderOptions.entities = [...newEntities];
+		rendererFunction(renderOptions);
+	});
+
 	onMount(async () => {
 		if (!containerElement) {
 			return;
@@ -19,6 +30,7 @@
 		// 1. Load JSCAD modules
 		const jscadRegl = await import('@jscad/regl-renderer');
 		const { prepareRender, drawCommands, cameras, controls, entitiesFromSolids } = jscadRegl;
+		entitiesFromSolidsFunction = entitiesFromSolids;
 
 		// init camera
 		const cameraStateOverride = { position: [5, -20, 30] };
@@ -42,11 +54,11 @@
 		const entities = entitiesFromSolids({}, geometryToRender);
 
 		// 4. Renderer Setup
-		const renderer = prepareRender({
+		rendererFunction = prepareRender({
 			glOptions: { container: containerElement }
 		});
 
-		const renderOptions = {
+		renderOptions = {
 			camera: preRenderState.camera,
 			drawCommands: {
 				drawGrid: drawCommands.drawGrid,
@@ -64,20 +76,20 @@
 		// --- THE KICKSTART ---
 		// This forces the very first frame to draw before any mouse interaction
 		perspectiveCamera.update(preRenderState.camera);
-		renderer(renderOptions);
+		rendererFunction(renderOptions);
 		// --------------------
 
 		// 5. Interaction variables
 		let rotateDelta = [0, 0];
 		let zoomDelta = 0;
 		let pointerDown = false;
-		let lastX = 0,
-			lastY = 0;
+		let lastX = 0;
+		let lastY = 0;
+
+		let updateView = false;
 
 		// 6. The Loop
 		const updateAndRender = () => {
-			let updateView = false;
-
 			if (rotateDelta[0] || rotateDelta[1]) {
 				const updated = orbitControls.rotate(
 					{ controls: preRenderState.controls, camera: preRenderState.camera, speed: 0.002 },
@@ -99,6 +111,8 @@
 			}
 
 			if (updateView || preRenderState.controls.changed) {
+				updateView = false;
+
 				const updates = orbitControls.update({
 					controls: preRenderState.controls,
 					camera: preRenderState.camera
@@ -106,7 +120,7 @@
 				preRenderState.controls = { ...preRenderState.controls, ...updates.controls };
 				preRenderState.camera.position = updates.camera.position;
 				perspectiveCamera.update(preRenderState.camera);
-				renderer(renderOptions);
+				rendererFunction(renderOptions);
 			}
 
 			window.requestAnimationFrame(updateAndRender);
@@ -137,20 +151,20 @@
 			zoomDelta += ev.deltaY;
 		};
 
-		resizeObserver = new ResizeObserver((entries) => {
-			console.log('resize', entries[0].contentRect);
-			perspectiveCamera.setProjection(camera, camera, {
-				width: containerElement.clientWidth,
-				height: containerElement.clientHeight
-			});
+		resizeObserver = new ResizeObserver(() => {
+			const width = containerElement.clientWidth;
+			const height = containerElement.clientHeight;
 
+			perspectiveCamera.setProjection(camera, camera, { width, height });
 			perspectiveCamera.update(camera);
-			renderer(renderOptions);
+			updateView = true;
 		});
 
 		resizeObserver.observe(containerElement);
 
 		window.requestAnimationFrame(updateAndRender);
+
+		ready = true;
 	});
 
 	onDestroy(() => {
@@ -163,9 +177,11 @@
 <style>
 	.jscad-container {
 		width: 100%;
-		height: 600px;
+		height: 100%;
 		background: var(--pico-background-color);
 		touch-action: none;
-		outline: 1px solid #ccc;
+		border-radius: var(--pico-border-radius);
+		background-color: var(--pico-card-background-color);
+		border: var(--pico-border-width) solid var(--pico-card-border-color);
 	}
 </style>

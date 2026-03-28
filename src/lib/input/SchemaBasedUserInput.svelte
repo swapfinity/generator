@@ -16,9 +16,6 @@
 	);
 
 	$effect(() => {
-		console.log('Result: ' + JSON.stringify(result));
-	});
-	$effect(() => {
 		const currentResult = $state.snapshot(result);
 
 		if (currentResult != null) {
@@ -105,12 +102,16 @@
 </script>
 
 <div>
-	<div>
-		<select onchange={handleOnSchemaSelect}>
+	<div class="type-select">
+		<label for="type-select">Label Type</label>
+		<select onchange={handleOnSchemaSelect} name={'type-select'}>
 			{#each Object.keys(LABEL_SCHEMA_MAP) as key}
 				<option value={key}>{key}</option>
 			{/each}
 		</select>
+	</div>
+	<div class="properties-heading">
+		<strong>Properties</strong>
 	</div>
 	{#each Object.values(rowGroupedInputs) as row}
 		<div style="display:flex; flex-wrap: wrap; column-gap:1rem;">
@@ -148,3 +149,13 @@
 		</div>
 	{/each}
 </div>
+
+<style lang="scss">
+	.type-select {
+		margin-bottom: calc(var(--pico-spacing) * 2);
+	}
+
+	.properties-heading {
+		margin-bottom: var(--pico-spacing);
+	}
+</style>

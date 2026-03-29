@@ -12,17 +12,13 @@
 		<a
 			href="https://github.com/swapfinity/generator/discussions"
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="noopener noreferrer">Discussions</a
 		>
-			Discussions
-		</a>
 		<a
 			href="https://github.com/swapfinity/generator/issues/new"
 			target="_blank"
-			rel="noopener noreferrer"
+			rel="noopener noreferrer">Report Issues</a
 		>
-			Report Issues
-		</a>
 	</div>
 </div>
 
@@ -35,12 +31,15 @@
 	}
 
 	.link-container {
+		display: flex;
 		margin-right: 2rem;
 		margin-left: 2rem;
 		padding: 0.5rem 0;
 
-		a + a {
-			margin-left: var(--pico-spacing);
+		gap: 0 var(--pico-spacing);
+
+		a {
+			white-space: nowrap;
 		}
 	}
 </style>

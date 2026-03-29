@@ -117,7 +117,7 @@
 	</div>
 	<div class="properties-heading">
 		<strong>Properties</strong>
-		<button class="outline secondary" style="border: none; margin-right: 0.25rem;" onclick={reset}
+		<button class="icon-button" style="margin-right: 0.25rem;" onclick={reset}
 			><ListRestart />
 		</button>
 	</div>

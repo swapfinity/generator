@@ -1,149 +1,167 @@
 <script lang="ts">
-	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	import * as jscad from '@jscad/modeling';
-	const { measurements } = jscad;
+	const { measurements, booleans } = jscad;
+
+	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { Focus } from 'lucide-svelte';
 
+	// consts
+	const RESIZE_TIMEOUT_MS = 50;
+	const DEFAULT_CAMERA_POSITION = [5, -20, 30];
+	const CAMERA_STATE_OVERRIDE = { position: DEFAULT_CAMERA_POSITION };
+	const CAMERA_Y_OFFSET = 0.01; // prevents camera flipping in top-down view
+	const GRID_ENTITY = {
+		visuals: {
+			drawCmd: 'drawGrid',
+			show: true,
+			transparent: true,
+			useVertexColors: false
+		},
+		size: [200, 200],
+		ticks: [10, 1],
+		color: [0.5, 0.5, 0.5, 0.3],
+		subColor: [0.5, 0.5, 0.5, 0.1]
+	};
+
 	// props
 	interface ModelViewerProps {
-		geometryToRender: Geom3 | Geom3[];
+		geometryToRender: Geom3 | Geom3[] | null;
 	}
 	let { geometryToRender }: ModelViewerProps = $props();
 
-	let containerElement: HTMLDivElement;
+	let viewerContainer: HTMLDivElement;
 	let resizeObserver: ResizeObserver;
+	let animationFrameId: number;
 
+	// renderer state
 	let rendererFunction: any = null;
 	let renderOptions: any = null;
 	let entitiesFromSolidsFunction: any = null;
-	let camera;
-	let perspectiveCamera;
-	let preRenderState;
-	let orbitControls;
-	let updateView;
+	let camera: any = null;
+	let perspectiveCamera: any = null;
+	let renderState: any = null;
+	let orbitControls: any = null;
+	let updateView: boolean = true; // initial update needed
 
-	let ready = $state(false);
+	let isRendererReady = $state(false);
 
+	/**
+	 * Refresh the entities in the viewer on change.
+	 */
 	$effect(() => {
-		if (!ready) return;
-		const newEntities = entitiesFromSolidsFunction({}, geometryToRender);
-		renderOptions.entities = [...newEntities];
-		rendererFunction(renderOptions);
-	});
-
-	onMount(async () => {
-		if (!containerElement) {
+		if (!isRendererReady) {
 			return;
 		}
 
-		// 1. Load JSCAD modules
+		const refreshedEntities = geometryToRender
+			? entitiesFromSolidsFunction({}, geometryToRender)
+			: [];
+		renderOptions.entities = [...refreshedEntities, GRID_ENTITY];
+		rendererFunction(renderOptions);
+	});
+
+	/**
+	 * Initial setup of the jscad renderer.
+	 */
+	onMount(async () => {
+		if (!viewerContainer) {
+			return;
+		}
+
+		// load JSCAD modules in onMount because window is needed for renderer
 		const jscadRegl = await import('@jscad/regl-renderer');
 		const { prepareRender, drawCommands, cameras, controls, entitiesFromSolids } = jscadRegl;
 		entitiesFromSolidsFunction = entitiesFromSolids;
 
-		// init camera
-		const cameraStateOverride = { position: [5, -20, 30] };
-
+		// init camera & controls
 		perspectiveCamera = cameras.perspective;
-		camera = Object.assign({}, perspectiveCamera.defaults, cameraStateOverride);
+		camera = Object.assign({}, perspectiveCamera.defaults, CAMERA_STATE_OVERRIDE);
 		perspectiveCamera.setProjection(camera, camera, {
-			width: containerElement.clientWidth,
-			height: containerElement.clientHeight
+			width: viewerContainer.clientWidth,
+			height: viewerContainer.clientHeight
 		});
-		perspectiveCamera.update(camera, camera);
 
 		orbitControls = controls.orbit;
 
-		preRenderState = {
+		renderState = {
 			camera: camera,
 			controls: orbitControls.defaults
 		};
 
-		// convert models to renderable entities
-		const entities = entitiesFromSolids({}, geometryToRender);
-
-		// 4. Renderer Setup
 		rendererFunction = prepareRender({
-			glOptions: { container: containerElement }
+			glOptions: { container: viewerContainer }
 		});
 
 		renderOptions = {
-			camera: preRenderState.camera,
+			camera: renderState.camera,
 			drawCommands: {
 				drawGrid: drawCommands.drawGrid,
 				drawMesh: drawCommands.drawMesh,
 				drawAxis: drawCommands.drawAxis,
 				drawLines: drawCommands.drawLines
 			},
-			entities: [...entities],
-			// sets the background color of the canvas
+			entities: [],
 			rendering: {
-				background: [0.12, 0.12, 0.12, 1.0]
+				background: [0.12, 0.12, 0.12, 1.0], // sets the background color of the canvas
+				ambientLightAmount: 0.4,
+				diffuseLightAmount: 0.5,
+				specularLightAmount: 0.02,
+				materialShininess: 1.0
 			}
 		};
 
-		// --- THE KICKSTART ---
-		// This forces the very first frame to draw before any mouse interaction
-		perspectiveCamera.update(preRenderState.camera);
-		rendererFunction(renderOptions);
-		// --------------------
-
-		// 5. Interaction variables
 		let rotateDelta = [0, 0];
 		let zoomDelta = 0;
 		let pointerDown = false;
 		let lastX = 0;
 		let lastY = 0;
 
-		updateView = false;
-
-		// 6. The Loop
 		const updateAndRender = () => {
 			if (rotateDelta[0] || rotateDelta[1]) {
 				const updated = orbitControls.rotate(
-					{ controls: preRenderState.controls, camera: preRenderState.camera, speed: 0.002 },
+					{ controls: renderState.controls, camera: renderState.camera, speed: 0.002 },
 					rotateDelta
 				);
-				preRenderState.controls = { ...preRenderState.controls, ...updated.controls };
+				renderState.controls = { ...renderState.controls, ...updated.controls };
 				rotateDelta = [0, 0];
 				updateView = true;
 			}
 
 			if (zoomDelta) {
 				const updated = orbitControls.zoom(
-					{ controls: preRenderState.controls, camera: preRenderState.camera, speed: 0.08 },
+					{ controls: renderState.controls, camera: renderState.camera, speed: 0.08 },
 					zoomDelta
 				);
-				preRenderState.controls = { ...preRenderState.controls, ...updated.controls };
+				renderState.controls = { ...renderState.controls, ...updated.controls };
 				zoomDelta = 0;
 				updateView = true;
 			}
 
-			if (updateView || preRenderState.controls.changed) {
+			if (updateView || renderState.controls.changed) {
 				updateView = false;
 
 				const updates = orbitControls.update({
-					controls: preRenderState.controls,
-					camera: preRenderState.camera
+					controls: renderState.controls,
+					camera: renderState.camera
 				});
-				preRenderState.controls = { ...preRenderState.controls, ...updates.controls };
-				preRenderState.camera.position = updates.camera.position;
-				perspectiveCamera.update(preRenderState.camera);
+				renderState.controls = { ...renderState.controls, ...updates.controls };
+				renderState.camera.position = updates.camera.position;
+				perspectiveCamera.update(renderState.camera);
 				rendererFunction(renderOptions);
 			}
 
-			window.requestAnimationFrame(updateAndRender);
+			animationFrameId = window.requestAnimationFrame(updateAndRender);
 		};
 
-		// 7. Event Handlers
-		containerElement.onpointerdown = (ev) => {
+		// add controls to viewer container
+		viewerContainer.onpointerdown = (ev) => {
 			pointerDown = true;
 			lastX = ev.pageX;
 			lastY = ev.pageY;
-			containerElement.setPointerCapture(ev.pointerId);
+			viewerContainer.setPointerCapture(ev.pointerId);
 		};
-		containerElement.onpointermove = (ev) => {
+		viewerContainer.onpointermove = (ev) => {
 			if (!pointerDown) {
 				return;
 			}
@@ -152,57 +170,69 @@
 			lastX = ev.pageX;
 			lastY = ev.pageY;
 		};
-		containerElement.onpointerup = (ev) => {
+		viewerContainer.onpointerup = (ev) => {
 			pointerDown = false;
-			containerElement.releasePointerCapture(ev.pointerId);
+			viewerContainer.releasePointerCapture(ev.pointerId);
 		};
-		containerElement.onwheel = (ev) => {
+		viewerContainer.onwheel = (ev) => {
 			ev.preventDefault();
 			zoomDelta += ev.deltaY;
 		};
 
+		// add resizeObserver to handle resizing
+		let resizeTimeout: ReturnType<typeof setTimeout>;
 		resizeObserver = new ResizeObserver(() => {
-			const width = containerElement.clientWidth;
-			const height = containerElement.clientHeight;
-
-			perspectiveCamera.setProjection(camera, camera, { width, height });
-			perspectiveCamera.update(camera);
-			fitCameraToGeometry();
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(() => {
+				const width = viewerContainer.clientWidth;
+				const height = viewerContainer.clientHeight;
+				perspectiveCamera.setProjection(camera, camera, { width, height });
+				perspectiveCamera.update(camera);
+				fitCameraToGeometry();
+			}, RESIZE_TIMEOUT_MS);
 		});
 
-		resizeObserver.observe(containerElement);
+		resizeObserver.observe(viewerContainer);
 
-		window.requestAnimationFrame(updateAndRender);
+		animationFrameId = window.requestAnimationFrame(updateAndRender);
 
-		ready = true;
+		isRendererReady = true;
 	});
 
 	onDestroy(() => {
 		resizeObserver?.disconnect();
+		cancelAnimationFrame(animationFrameId);
 	});
 
 	const fitCameraToGeometry = () => {
-		const [[minX, minY, minZ], [maxX, maxY, maxZ]] =
-			measurements.measureBoundingBox(geometryToRender)[0];
+		if (!isRendererReady || !geometryToRender) {
+			return;
+		}
+
+		const unionedGeoms = jscad.booleans.union(geometryToRender);
+
+		// get dimensions & center of the geom3
+		const [[minX, minY, minZ], [maxX, maxY, maxZ]] = measurements.measureBoundingBox(unionedGeoms);
 		const width = maxX - minX;
 		const height = maxY - minY;
 		const center = [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2];
 
-		const aspect = containerElement.clientWidth / containerElement.clientHeight;
+		// calculate aspect ratio & field of views
+		const aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
 		const verticalFov = camera.fov;
 		const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
 
+		// calculate the distance needed to cover the whole geometry
 		const distanceForHeight = height / (2 * Math.tan(verticalFov / 2));
 		const distanceForWidth = width / (2 * Math.tan(horizontalFov / 2));
 		const distance = Math.max(distanceForHeight, distanceForWidth);
 
-		console.log({ width, height, distanceForHeight, distanceForWidth, distance, aspect });
-
+		// update camera target & position
 		camera.target = [...center];
-		camera.position = [center[0], center[1] - distance * 0.5, center[2] + distance * 1.2];
+		camera.position = [center[0], center[1] - CAMERA_Y_OFFSET, center[2] + distance * 1.1];
 
-		preRenderState.controls = { ...orbitControls.defaults };
-		preRenderState.camera = camera;
+		renderState.controls = { ...orbitControls.defaults };
+		renderState.camera = camera;
 
 		perspectiveCamera.update(camera);
 		updateView = true;
@@ -210,8 +240,8 @@
 </script>
 
 <div class="viewer-container">
-	<div bind:this={containerElement} class="jscad-container"></div>
-	<button class="reset-view-button outline secondary" onclick={fitCameraToGeometry}>
+	<div bind:this={viewerContainer} class="jscad-container"></div>
+	<button class="reset-view-button icon-button" onclick={fitCameraToGeometry}>
 		<Focus />
 	</button>
 </div>
@@ -237,6 +267,5 @@
 		position: absolute;
 		bottom: 0.5rem;
 		right: 0.5rem;
-		border: none;
 	}
 </style>

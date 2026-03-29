@@ -1,0 +1,30 @@
+@use "@picocss/pico/scss/pico" with ($theme-color: "indigo");
+@use "@picocss/pico/scss/pico.colors" as pico-colors;
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+}
+
+.highlight {
+    color: var(--pico-primary);
+}
+
+.icon-button {
+    @extend .outline;
+    @extend .secondary;
+    border: none;
+
+    &:hover {
+        outline: var(--pico-border-width) solid var(--pico-secondary);
+    }
+
+    &:focus:not(:focus-visible) {
+        box-shadow: none;
+    }
+
+    &:active {
+        background-color: var(--pico-secondary-background);
+    }
+}

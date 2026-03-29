@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
+	import * as jscad from '@jscad/modeling';
+	const { measurements } = jscad;
 	import { onDestroy, onMount } from 'svelte';
+	import { Focus } from 'lucide-svelte';
 
 	// props
 	interface ModelViewerProps {
@@ -14,7 +17,14 @@
 	let rendererFunction: any = null;
 	let renderOptions: any = null;
 	let entitiesFromSolidsFunction: any = null;
+	let camera;
+	let perspectiveCamera;
+	let preRenderState;
+	let orbitControls;
+	let updateView;
+
 	let ready = $state(false);
+
 	$effect(() => {
 		if (!ready) return;
 		const newEntities = entitiesFromSolidsFunction({}, geometryToRender);
@@ -35,17 +45,17 @@
 		// init camera
 		const cameraStateOverride = { position: [5, -20, 30] };
 
-		const perspectiveCamera = cameras.perspective;
-		const camera = Object.assign({}, perspectiveCamera.defaults, cameraStateOverride);
+		perspectiveCamera = cameras.perspective;
+		camera = Object.assign({}, perspectiveCamera.defaults, cameraStateOverride);
 		perspectiveCamera.setProjection(camera, camera, {
 			width: containerElement.clientWidth,
 			height: containerElement.clientHeight
 		});
 		perspectiveCamera.update(camera, camera);
 
-		const orbitControls = controls.orbit;
+		orbitControls = controls.orbit;
 
-		let preRenderState = {
+		preRenderState = {
 			camera: camera,
 			controls: orbitControls.defaults
 		};
@@ -86,7 +96,7 @@
 		let lastX = 0;
 		let lastY = 0;
 
-		let updateView = false;
+		updateView = false;
 
 		// 6. The Loop
 		const updateAndRender = () => {
@@ -157,7 +167,7 @@
 
 			perspectiveCamera.setProjection(camera, camera, { width, height });
 			perspectiveCamera.update(camera);
-			updateView = true;
+			fitCameraToGeometry();
 		});
 
 		resizeObserver.observe(containerElement);
@@ -170,11 +180,49 @@
 	onDestroy(() => {
 		resizeObserver?.disconnect();
 	});
+
+	const fitCameraToGeometry = () => {
+		const [[minX, minY, minZ], [maxX, maxY, maxZ]] =
+			measurements.measureBoundingBox(geometryToRender)[0];
+		const width = maxX - minX;
+		const height = maxY - minY;
+		const center = [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2];
+
+		const aspect = containerElement.clientWidth / containerElement.clientHeight;
+		const verticalFov = camera.fov;
+		const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
+
+		const distanceForHeight = height / (2 * Math.tan(verticalFov / 2));
+		const distanceForWidth = width / (2 * Math.tan(horizontalFov / 2));
+		const distance = Math.max(distanceForHeight, distanceForWidth);
+
+		console.log({ width, height, distanceForHeight, distanceForWidth, distance, aspect });
+
+		camera.target = [...center];
+		camera.position = [center[0], center[1] - distance * 0.5, center[2] + distance * 1.2];
+
+		preRenderState.controls = { ...orbitControls.defaults };
+		preRenderState.camera = camera;
+
+		perspectiveCamera.update(camera);
+		updateView = true;
+	};
 </script>
 
-<div bind:this={containerElement} class="jscad-container"></div>
+<div class="viewer-container">
+	<div bind:this={containerElement} class="jscad-container"></div>
+	<button class="reset-view-button outline secondary" onclick={fitCameraToGeometry}>
+		<Focus />
+	</button>
+</div>
 
-<style>
+<style lang="scss">
+	.viewer-container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
 	.jscad-container {
 		width: 100%;
 		height: 100%;
@@ -183,5 +231,12 @@
 		border-radius: var(--pico-border-radius);
 		background-color: var(--pico-card-background-color);
 		border: var(--pico-border-width) solid var(--pico-card-border-color);
+	}
+
+	.reset-view-button {
+		position: absolute;
+		bottom: 0.5rem;
+		right: 0.5rem;
+		border: none;
 	}
 </style>

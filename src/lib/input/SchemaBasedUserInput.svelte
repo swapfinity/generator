@@ -2,6 +2,7 @@
 	import z from 'zod';
 	import type { BaseInput, GroupedInputs, InputDefinition } from './input-types';
 	import { LABEL_SCHEMA_MAP, type LabelDefinition } from './schemas/general-schemas';
+	import { ListRestart } from 'lucide-svelte';
 
 	interface SchemaBasedUserInputProps {
 		onChange: (updated: LabelDefinition) => void;
@@ -99,6 +100,10 @@
 		selectedKey = target.value as keyof typeof LABEL_SCHEMA_MAP;
 		result = LABEL_SCHEMA_MAP[selectedKey].parse({});
 	};
+
+	const reset = () => {
+		result = LABEL_SCHEMA_MAP[selectedKey].parse({});
+	};
 </script>
 
 <div>
@@ -112,6 +117,9 @@
 	</div>
 	<div class="properties-heading">
 		<strong>Properties</strong>
+		<button class="outline secondary" style="border: none; margin-right: 0.25rem;" onclick={reset}
+			><ListRestart />
+		</button>
 	</div>
 	{#each Object.values(rowGroupedInputs) as row}
 		<div style="display:flex; flex-wrap: wrap; column-gap:1rem;">
@@ -157,5 +165,7 @@
 
 	.properties-heading {
 		margin-bottom: var(--pico-spacing);
+		display: flex;
+		justify-content: space-between;
 	}
 </style>

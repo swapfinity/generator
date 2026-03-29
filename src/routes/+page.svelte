@@ -49,7 +49,7 @@
 			</div>
 			<SchemaBasedUserInput onChange={handleFormChange} />
 		</div>
-		<ModelStlExporter {geometryToRender} fileName="label.stl" />
+		<ModelStlExporter {geometryToRender} fileName="label" />
 	</div>
 	<div class="viewer">
 		{#if loading}

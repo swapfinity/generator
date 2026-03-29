@@ -4,11 +4,12 @@
 	import { LABEL_SCHEMA_MAP, type LabelDefinition } from './schemas/general-schemas';
 	import { ListRestart } from 'lucide-svelte';
 
+	// props
 	interface SchemaBasedUserInputProps {
 		onChange: (updated: LabelDefinition) => void;
 	}
-
 	let { onChange }: SchemaBasedUserInputProps = $props();
+
 	const initialKey = Object.keys(LABEL_SCHEMA_MAP)[0] as keyof typeof LABEL_SCHEMA_MAP;
 	let selectedKey = $state<keyof typeof LABEL_SCHEMA_MAP>(initialKey);
 	let derivedSchema = $derived(LABEL_SCHEMA_MAP[selectedKey]);
@@ -19,9 +20,7 @@
 	$effect(() => {
 		const currentResult = $state.snapshot(result);
 
-		if (currentResult != null) {
-			onChange(currentResult as LabelDefinition);
-		}
+		onChange(currentResult as LabelDefinition);
 	});
 
 	const groupByRow = (inputs: InputDefinition[]): Record<string, InputDefinition[]> => {
@@ -109,23 +108,21 @@
 <div>
 	<div class="type-select">
 		<label for="type-select">Label Type</label>
-		<select onchange={handleOnSchemaSelect} name={'type-select'}>
+		<select onchange={handleOnSchemaSelect} name="type-select">
 			{#each Object.keys(LABEL_SCHEMA_MAP) as key}
 				<option value={key}>{key}</option>
 			{/each}
 		</select>
 	</div>
-	<div class="properties-heading">
+	<div class="properties-label">
 		<strong>Properties</strong>
-		<button class="icon-button" style="margin-right: 0.25rem;" onclick={reset}
-			><ListRestart />
-		</button>
+		<button class="icon-button reset-button" onclick={reset}><ListRestart /> </button>
 	</div>
 	{#each Object.values(rowGroupedInputs) as row}
-		<div style="display:flex; flex-wrap: wrap; column-gap:1rem;">
+		<div class="input-container">
 			{#each row as input (input.fieldName)}
 				{#if input.type === 'TEXT'}
-					<div style={`flex: ${input.rowWeight ?? 1} 1 0; min-width: 100px;`}>
+					<div class="text-input" style={`flex: ${input.rowWeight ?? 1} 1 0;`}>
 						<label for={input.fieldName}>{input.viewName}</label>
 						<input
 							type="text"
@@ -135,9 +132,9 @@
 						/>
 					</div>
 				{:else if input.type === 'BOOLEAN'}
-					<input type="checkbox" />
+					<!-- TODO: not yet implemented -->
 				{:else if input.type === 'ENUM'}
-					<div style={`flex: ${input.rowWeight ?? 1} 1 0; min-width: 100px;`}>
+					<div class="enum-input" style={`flex: ${input.rowWeight ?? 1} 1 0;`}>
 						<label for={input.fieldName}>{input.viewName}</label>
 						<select
 							name={input.fieldName}
@@ -163,9 +160,27 @@
 		margin-bottom: calc(var(--pico-spacing) * 2);
 	}
 
-	.properties-heading {
+	.properties-label {
 		margin-bottom: var(--pico-spacing);
 		display: flex;
 		justify-content: space-between;
+	}
+
+	.reset-button {
+		margin-right: 0.25rem;
+	}
+
+	.input-container {
+		display: flex;
+		flex-wrap: wrap;
+		column-gap: 1rem;
+	}
+
+	.text-input {
+		min-width: 100px;
+	}
+
+	.enum-input {
+		min-width: 100px;
 	}
 </style>

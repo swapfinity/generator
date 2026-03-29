@@ -1,4 +1,4 @@
-
+import opentype from 'opentype.js';
 import * as jscad from '@jscad/modeling';
 const { booleans, colors, extrusions, primitives, transforms, geometries } = jscad;
 import { createText, type Fonts } from './font-utils';
@@ -75,7 +75,6 @@ const createLabelBase3D = (): Geom3 => {
 
     const labelBase2D = booleans.union(leftTab, rightTab, labelBody, ...innerCornerFillets);
     const labelBase3D = colors.colorize([1, 1, 1], extrusions.extrudeLinear({ height: label_thickness }, labelBase2D));
-    geometries.geom3.validate(labelBase3D);
 
     return labelBase3D;
 }

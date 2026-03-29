@@ -209,10 +209,28 @@
 			return;
 		}
 
-		const unionedGeoms = jscad.booleans.union(geometryToRender);
+		const geoms = Array.isArray(geometryToRender) ? geometryToRender : [geometryToRender];
+		const boundingBoxes = measurements.measureBoundingBox(...geoms);
+		const boundingBoxesAsArray = Array.isArray(boundingBoxes) ? boundingBoxes : [boundingBoxes];
 
-		// get dimensions & center of the geom3
-		const [[minX, minY, minZ], [maxX, maxY, maxZ]] = measurements.measureBoundingBox(unionedGeoms);
+		// find the mins & maxs positions of all bounding boxes
+		let minX = Infinity,
+			minY = Infinity,
+			minZ = Infinity;
+		let maxX = -Infinity,
+			maxY = -Infinity,
+			maxZ = -Infinity;
+
+		for (const [[x0, y0, z0], [x1, y1, z1]] of boundingBoxesAsArray) {
+			if (x0 < minX) minX = x0;
+			if (y0 < minY) minY = y0;
+			if (z0 < minZ) minZ = z0;
+			if (x1 > maxX) maxX = x1;
+			if (y1 > maxY) maxY = y1;
+			if (z1 > maxZ) maxZ = z1;
+		}
+
+		// get dimensions & center of the overall bounding box
 		const width = maxX - minX;
 		const height = maxY - minY;
 		const center = [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2];

@@ -18,5 +18,3 @@ export const LabelDefinitionSchema = z.discriminatedUnion("type", [ScrewLabelSch
 export type LabelDefinition = z.infer<typeof LabelDefinitionSchema>
 
 export type PlainTextLabel = z.infer<typeof PlainTextLabelSchema>
-
-// TODO move to input folder

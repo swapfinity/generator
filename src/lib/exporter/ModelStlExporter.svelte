@@ -3,14 +3,14 @@
 	import { Download } from 'lucide-svelte';
 	// @ts-ignore
 	import * as stlSerializer from '@jscad/stl-serializer';
-	const { serialize, mimeType, fileExtension } = stlSerializer;
+	const { serialize, mimeType } = stlSerializer;
 
 	interface ModelStlExporterProps {
 		geometryToRender: Geom3 | Geom3[] | null;
-		fileName: string | undefined;
-	} //TODO error if fileName doesnt end on fileExtension
-
-	let { geometryToRender, fileName = 'model.' + fileExtension }: ModelStlExporterProps = $props();
+		fileName: string;
+	}
+	let { geometryToRender, fileName = 'model' }: ModelStlExporterProps = $props();
+	const fullFileName = $derived(`${fileName}.stl`);
 
 	const generateMesh = () => {
 		return serialize({}, geometryToRender);
@@ -36,14 +36,20 @@
 
 	const handleButtonClick = () => {
 		const serializedGeometry = generateMesh();
-		downloadAsFile(serializedGeometry, fileName, mimeType);
+		downloadAsFile(serializedGeometry, fullFileName, mimeType);
 	};
 </script>
 
-<button onclick={handleButtonClick} disabled={!geometryToRender} style="width: 100%">
+<button onclick={handleButtonClick} disabled={!geometryToRender} class="download-button">
 	{#if geometryToRender}
 		<Download /> Download as STL
 	{:else}
 		<span aria-busy="true"></span>
 	{/if}
 </button>
+
+<style lang="scss">
+	.download-button {
+		width: 100%;
+	}
+</style>

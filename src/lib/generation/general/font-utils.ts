@@ -9,8 +9,9 @@ import overpassExtraBoldFontUrl from '$lib/assets/Overpass-ExtraBold.ttf?url'
 import * as jscad from '@jscad/modeling';
 const { transforms, geometries } = jscad;
 
+const CURVE_STEPS = 32
 
-export function createText(text: string, font: any, size = 10) {
+export function createText(text: string, font: opentype.Font, size = 10) {
 
     const path = font.getPath(text, 0, 0, size, { kerning: true })
 
@@ -24,7 +25,7 @@ export function createText(text: string, font: any, size = 10) {
     return text2DCentered
 }
 
-function flattenPath(path: opentype.Path, steps = 10): [number, number][][] {
+function flattenPath(path: opentype.Path, steps = CURVE_STEPS): [number, number][][] {
     const polygons: [number, number][][] = []
 
     let contourPoints: [number, number][] = []
@@ -82,12 +83,9 @@ function polygonFromPoints(paths: [number, number][][]): Geom2 {
     const allSides: [[number, number], [number, number]][] = [];
 
     paths.forEach((points) => {
-        const processedPoints = points;
-
-        // 3. Create segments (sides) for this path and add to the master list
-        for (let i = 0; i < processedPoints.length; i++) {
-            const p1 = processedPoints[i];
-            const p2 = processedPoints[(i + 1) % processedPoints.length];
+        for (let i = 0; i < points.length; i++) {
+            const p1 = points[i];
+            const p2 = points[(i + 1) % points.length];
             allSides.push([p1, p2]);
         }
     });

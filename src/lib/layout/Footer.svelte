@@ -10,6 +10,16 @@
 	</div>
 	<div class="link-container">
 		<a
+			href="https://www.printables.com/@Kanelloupou/collections/2218776"
+			target="_blank"
+			rel="noopener noreferrer">Printables</a
+		>
+		<a
+			href="https://makerworld.com/de/collections/23800541-swapfinity"
+			target="_blank"
+			rel="noopener noreferrer">Makerworld</a
+		>
+		<a
 			href="https://github.com/swapfinity/generator/discussions"
 			target="_blank"
 			rel="noopener noreferrer">Discussions</a
@@ -32,6 +42,7 @@
 
 	.link-container {
 		display: flex;
+		flex-wrap: wrap;
 		margin-right: 2rem;
 		margin-left: 2rem;
 		padding: 0.5rem 0;

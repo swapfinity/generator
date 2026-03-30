@@ -1,7 +1,7 @@
 import type { Geom2 } from '@jscad/modeling/src/geometries/types'
 import * as jscad from '@jscad/modeling';
 import type { ScrewDrive } from '$lib/input/schemas/screw-schema';
-const { booleans, transforms, primitives } = jscad;
+const { booleans, transforms, primitives, utils } = jscad;
 
 
 export const getScrewDriveIcon = (screwDrive: ScrewDrive): Geom2 => {
@@ -12,6 +12,8 @@ const getIconForScrewDrive = (screwDrive: ScrewDrive) => {
     switch (screwDrive) {
         case "PH":
             return generatePhIcon()
+        case "PZ":
+            return generatePzIcon()
         case "SLOT":
             return generateSlotIcon()
         case "CROSS":
@@ -36,6 +38,9 @@ const barWidth = 1.575
 
 export const ICON_CIRCLE_RADIUS = 4.45
 const iconCircleWallStrength = 0.45
+
+const PZ_DIAGONAL_BAR_LENGTH = 4.5
+const PZ_DIAGONAL_BAR_WIDTH = 0.9
 
 const squareWidth = 3.6
 
@@ -68,8 +73,19 @@ const generatePhIcon = (): Geom2 => {
     const verticalBar = primitives.rectangle({ size: [barWidth, crossBarLength] })
     const middleSquare = transforms.rotateZ(Math.PI / 4, primitives.square({ size: 2 * barWidth }))
 
-
     return booleans.union(horizontalBar, verticalBar, middleSquare)
+}
+
+const generatePzIcon = (): Geom2 => {
+    const horizontalBar = primitives.rectangle({ size: [crossBarLength, barWidth] })
+    const verticalBar = primitives.rectangle({ size: [barWidth, crossBarLength] })
+    const middleSquare = transforms.rotateZ(Math.PI / 4, primitives.square({ size: 2 * barWidth }))
+
+    const diagonalBar = primitives.rectangle({ size: [PZ_DIAGONAL_BAR_LENGTH, PZ_DIAGONAL_BAR_WIDTH] })
+    const rotatedDiagonalBar = transforms.rotateZ(utils.degToRad(45), diagonalBar)
+    const rotatedDiagonalBar2 = transforms.rotateZ(utils.degToRad(-45), diagonalBar)
+
+    return booleans.union(horizontalBar, verticalBar, middleSquare, rotatedDiagonalBar, rotatedDiagonalBar2)
 }
 
 const generateSquareIcon = (): Geom2 => {

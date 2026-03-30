@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // schemas
 const screwDrive = z
-    .enum(["PH", "SLOT", "CROSS", "SQUARE", "HEX_SOCKET", "TORX"])
+    .enum(["PH", "PZ", "SLOT", "CROSS", "SQUARE", "HEX_SOCKET", "TORX"])
     .default("TORX").describe("The drive type of the screw.")
     .meta({ viewName: "Screw Drive", rowWeight: 1, rowName: "screwDrive" })
 const screwType = z

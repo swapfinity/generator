@@ -20,6 +20,9 @@ body {
     @extend .secondary;
     border: none;
 
+    display: flex;
+    align-items: center;
+
     &:hover {
         outline: var(--pico-border-width) solid var(--pico-secondary);
     }

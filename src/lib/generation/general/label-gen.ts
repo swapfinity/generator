@@ -26,7 +26,6 @@ export const generateLabelGeometry = (
     labelDefinition: LabelDefinition,
     fonts: Fonts
 ) => {
-    console.log("LABEL DEF: ", JSON.stringify(labelDefinition))
     const labelBase3D = createLabelBase3D();
 
     switch (labelDefinition.type) {

@@ -36,7 +36,7 @@
 	});
 
 	const handleFormChange = (updatedUserInput: LabelDefinition) => {
-		Object.assign(userInput, updatedUserInput);
+		userInput = updatedUserInput;
 	};
 </script>
 

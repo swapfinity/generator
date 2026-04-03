@@ -1,4 +1,4 @@
-<div class="header-container">
+<div class="header-container bottom-divider">
 	<div class="highlight logo">Swapfinity Label Generator</div>
 </div>
 
@@ -7,7 +7,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
 	}
 
 	.logo {

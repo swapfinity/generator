@@ -11,6 +11,10 @@ body {
     color: var(--pico-primary);
 }
 
+.bottom-divider {
+    border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+}
+
 .icon-button {
     @extend .outline;
     @extend .secondary;

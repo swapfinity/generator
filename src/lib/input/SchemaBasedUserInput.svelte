@@ -12,6 +12,7 @@
 	import CheckboxInput from './inputs/CheckboxInput.svelte';
 	import NumberInput from './inputs/NumberInput.svelte';
 	import type { RowDefinition, RowDefinitions } from './row-types';
+	import ShareButton from '$lib/shared/components/ShareButton.svelte';
 
 	// props
 	interface SchemaBasedUserInputProps {
@@ -215,7 +216,10 @@
 	</div>
 	<div class="properties-label bottom-divider">
 		<strong>Properties</strong>
-		<button class="icon-button reset-button" onclick={reset}><ListRestart /> </button>
+		<div class="action-container">
+			<ShareButton />
+			<button class="icon-button" onclick={reset}><ListRestart /></button>
+		</div>
 	</div>
 	{#each Object.entries(rowGroupedInputs) as [rowKey, inputs]}
 		{@const rowDef = rowDefinitions[rowKey]}
@@ -241,7 +245,9 @@
 		align-items: center;
 	}
 
-	.reset-button {
+	.action-container {
+		display: flex;
+		align-items: center;
 		margin-right: 0.25rem;
 	}
 

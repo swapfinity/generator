@@ -1,4 +1,5 @@
-export type BaseInput = {
+// base definition
+export type BaseInputDefinition = {
     fieldName: string,
     viewName?: string,
     description?: string,
@@ -6,28 +7,51 @@ export type BaseInput = {
     nullable: boolean,
     default: any
     rowName?: string,
-    rowWeight?: number
+    rowWeight?: number,
+    disabledWhen?: DisabledWhen
 }
 
-export type TextInput = BaseInput & {
+export type DisabledWhen = {
+    field: string,
+    when: boolean
+}
+
+
+// type definition
+export type TextInputDefinition = BaseInputDefinition & {
     type: "TEXT"
 }
 
-export type EnumInput = BaseInput & {
-    type: "ENUM"
+export type NumberInputDefinition = BaseInputDefinition & {
+    type: "NUMBER"
+    min?: number
+    max?: number
+    step?: number
+}
+
+export type SelectInputDefinition = BaseInputDefinition & {
+    type: "SELECT"
     options: string[]
+    labelMap?: Record<string, string>
 }
 
-export type EnumOption = {
-    value: string
-    label: string
+export type RadioInputDefinition = BaseInputDefinition & {
+    type: "RADIO"
+    options: string[]
+    labelMap?: Record<string, string>
 }
 
-export type BooleanInput = BaseInput & {
+export type CheckboxInputDefinition = BaseInputDefinition & {
     type: "BOOLEAN"
 }
 
 
-export type InputDefinition = TextInput | EnumInput | BooleanInput
+
+export type InputDefinition =
+    TextInputDefinition
+    | NumberInputDefinition
+    | SelectInputDefinition
+    | RadioInputDefinition
+    | CheckboxInputDefinition;
 
 export type GroupedInputs = Record<string, InputDefinition[]>;

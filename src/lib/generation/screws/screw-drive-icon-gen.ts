@@ -39,7 +39,7 @@ const barWidth = 1.575
 export const ICON_CIRCLE_RADIUS = 4.45
 const iconCircleWallStrength = 0.45
 
-const PZ_DIAGONAL_BAR_LENGTH = 4.5
+const PZ_DIAGONAL_BAR_LENGTH = 5.5
 const PZ_DIAGONAL_BAR_WIDTH = 0.9
 
 const squareWidth = 3.6

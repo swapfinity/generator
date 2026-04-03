@@ -18,13 +18,15 @@ const tab_radius = tab_diameter / 2;
 const segments = 32;
 const label_thickness = 0.6;
 
-const main_text_size = 6.5;
 const main_text_thickness = 0.4;
+
+const screwTypeIconAndMainTextXOffset = -0.5
 
 export const generateLabelGeometry = (
     labelDefinition: LabelDefinition,
     fonts: Fonts
 ) => {
+    console.log("LABEL DEF: ", JSON.stringify(labelDefinition))
     const labelBase3D = createLabelBase3D();
 
     switch (labelDefinition.type) {
@@ -37,15 +39,38 @@ export const generateLabelGeometry = (
             return [labelBase3D, iconandText3D];
         }
 
-        case "PLAIN_TEXT": {
-            if (!labelDefinition.text) {
-                return [labelBase3D]
+        case "CUSTOMIZABLE_TEXT": {
+            const firstLinePresent = Boolean(labelDefinition.firstLine)
+            const secondLinePresent = Boolean(labelDefinition.secondLine)
+
+            const result: Geom3[] = [labelBase3D]
+
+            // first line
+            if (firstLinePresent) {
+
+                const firstLineY = (secondLinePresent ? y_length / 4 : 0) + labelDefinition.firstLineYOffset
+                const firstLine2D = transforms.translate(
+                    [labelDefinition.firstLineXOffset, firstLineY, 0],
+                    createText(labelDefinition.firstLine, fonts[labelDefinition.firstLineFontWeight], labelDefinition.firstLineFontSize)
+                )
+                const firstLine3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, firstLine2D)));
+
+                result.push(firstLine3D)
             }
 
-            const text2D = createText(labelDefinition.text, fonts.regular, main_text_size)
-            const text3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, text2D)));
+            // second line
+            if (secondLinePresent) {
+                const secondLineY = -(y_length / 4) + labelDefinition.secondLineYOffset
+                const secondLine2D = transforms.translate(
+                    [labelDefinition.secondLineXOffset, secondLineY, 0],
+                    createText(labelDefinition.secondLine, fonts[labelDefinition.secondLineFontWeight], labelDefinition.secondLineFontSize)
+                )
+                const secondLine3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, secondLine2D)));
 
-            return [labelBase3D, text3D]
+                result.push(secondLine3D)
+            }
+
+            return result
         }
     }
 }
@@ -112,7 +137,10 @@ const createScrewTypeIconAndMainText = (labelDefinition: ScrewLabelDefinition, b
     const icon = transforms.translate(centerForIcon, getScrewTypeIcon(labelDefinition.screwType))
 
     if (withScrewTypeText) {
-        const screwTypeText2D = transforms.translate([x_length / 2 - x_length / 3, -(y_length / 2 - y_length / 4), 0], createText(labelDefinition.screwMainText, boldFont, screwTypeTextSize))
+        const screwTypeText2D = transforms.translate(
+            [x_length / 2 - x_length / 3 + screwTypeIconAndMainTextXOffset, -(y_length / 2 - y_length / 4), 0],
+            createText(labelDefinition.screwMainText, boldFont, screwTypeTextSize)
+        )
         return booleans.union(icon, screwTypeText2D)
 
     }
@@ -123,7 +151,7 @@ const createScrewTypeIconAndMainText = (labelDefinition: ScrewLabelDefinition, b
 }
 
 const getCenterForScrewTypeIcon = (withText: boolean): [number, number, number] => {
-    const x = x_length / 2 - x_length / 3
+    const x = x_length / 2 - x_length / 3 + screwTypeIconAndMainTextXOffset
     if (withText) {
         const y = y_length / 2 - (y_length / 4 + 0.4)
         return [x, y, 0]

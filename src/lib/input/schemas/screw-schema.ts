@@ -3,12 +3,37 @@ import { z } from "zod";
 // schemas
 const screwDrive = z
     .enum(["PH", "PZ", "SLOT", "CROSS", "SQUARE", "HEX_SOCKET", "TORX"])
-    .default("TORX").describe("The drive type of the screw.")
-    .meta({ viewName: "Screw Drive", rowWeight: 1, rowName: "screwDrive" })
+    .default("TORX")
+    .describe("The drive type of the screw.")
+    .meta({
+        viewName: "Screw Drive",
+        rowWeight: 1,
+        rowName: "screwDrive",
+        labelMap: {
+            PH: "Phillips",
+            PZ: "Pozidrive",
+            SLOT: "Slotted",
+            CROSS: "Cross",
+            SQUARE: "Square",
+            HEX_SOCKET: "Hex Socket",
+            TORX: "Torx",
+        }
+    })
+
 const screwType = z
     .enum(["FLAT_HEAD", "ROUND_HEAD", "PAN_HEAD"])
-    .default("PAN_HEAD").describe("The type of the screw.")
-    .meta({ viewName: "Screw Type", rowWeight: 1, rowName: "screwType" })
+    .default("PAN_HEAD")
+    .describe("The type of the screw.")
+    .meta({
+        viewName: "Screw Type",
+        rowWeight: 1,
+        rowName: "screwType",
+        labelMap: {
+            FLAT_HEAD: "Flat Head",
+            ROUND_HEAD: "Round Head",
+            PAN_HEAD: "Pan Head",
+        }
+    })
 
 const screwDriveText = z
     .string()

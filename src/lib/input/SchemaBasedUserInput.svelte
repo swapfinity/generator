@@ -15,15 +15,19 @@
 
 	// props
 	interface SchemaBasedUserInputProps {
+		initialValue?: LabelDefinition;
 		onChange: (updated: LabelDefinition) => void;
 	}
-	let { onChange }: SchemaBasedUserInputProps = $props();
+	let { initialValue, onChange }: SchemaBasedUserInputProps = $props();
 
-	const initialKey = Object.keys(LABEL_SCHEMA_MAP)[0] as keyof typeof LABEL_SCHEMA_MAP;
+	const initialKey = (initialValue?.type ??
+		Object.keys(LABEL_SCHEMA_MAP)[0]) as keyof typeof LABEL_SCHEMA_MAP;
+
 	let selectedKey = $state<keyof typeof LABEL_SCHEMA_MAP>(initialKey);
-	let derivedSchema = $derived(LABEL_SCHEMA_MAP[selectedKey]);
+
+	let derivedSchema = $derived(LABEL_SCHEMA_MAP[selectedKey].schema);
 	let result = $state<LabelDefinition & Record<string, any>>(
-		LABEL_SCHEMA_MAP[initialKey].parse({})
+		LABEL_SCHEMA_MAP[initialKey].schema.parse(initialValue ?? {})
 	);
 
 	$effect(() => {
@@ -55,6 +59,7 @@
 					let optional = false;
 					let nullable = false;
 					let defaultValue = undefined;
+					// @ts-ignore
 					const meta = value?.meta();
 
 					while (true) {
@@ -131,11 +136,11 @@
 	const handleOnSchemaSelect = (event: Event) => {
 		const target = event.currentTarget as HTMLSelectElement;
 		selectedKey = target.value as keyof typeof LABEL_SCHEMA_MAP;
-		result = LABEL_SCHEMA_MAP[selectedKey].parse({});
+		result = LABEL_SCHEMA_MAP[selectedKey].schema.parse({});
 	};
 
 	const reset = () => {
-		result = LABEL_SCHEMA_MAP[selectedKey].parse({});
+		result = LABEL_SCHEMA_MAP[selectedKey].schema.parse({});
 	};
 
 	const isInputDisabled = (input: InputDefinition) =>
@@ -202,9 +207,9 @@
 <div>
 	<div class="type-select">
 		<label for="type-select">Label Type</label>
-		<select onchange={handleOnSchemaSelect} name="type-select">
-			{#each Object.keys(LABEL_SCHEMA_MAP) as key}
-				<option value={key}>{key}</option>
+		<select value={selectedKey} onchange={handleOnSchemaSelect} name="type-select">
+			{#each Object.entries(LABEL_SCHEMA_MAP) as [key, { displayName }]}
+				<option value={key}>{displayName}</option>
 			{/each}
 		</select>
 	</div>

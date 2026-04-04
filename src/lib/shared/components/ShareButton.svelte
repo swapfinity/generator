@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { Link, Check } from 'lucide-svelte';
+	import { hover } from '../has-hover.svelte';
 
 	let copied = $state(false);
+	let button = $state<HTMLButtonElement | null>(null);
 
 	const share = () => {
 		if (copied) {
@@ -12,7 +14,7 @@
 		copied = true;
 		setTimeout(() => {
 			copied = false;
-			(document.activeElement as HTMLElement)?.blur();
+			button?.blur();
 		}, 2000);
 	};
 </script>
@@ -20,7 +22,8 @@
 <button
 	class="icon-button"
 	onclick={share}
-	data-tooltip={copied ? 'Copied!' : 'Copy shareable link'}
+	data-tooltip={copied ? 'Copied!' : hover.present ? 'Copy shareable link' : undefined}
+	bind:this={button}
 >
 	<span class:copied>
 		{#if copied}

@@ -16,10 +16,15 @@ export type DisabledWhen = {
     when: boolean
 }
 
+export type InputPattern = {
+    pattern: string;
+    message: string;
+};
 
 // type definition
 export type TextInputDefinition = BaseInputDefinition & {
-    type: "TEXT"
+    type: "TEXT";
+    patterns?: InputPattern[];
 }
 
 export type NumberInputDefinition = BaseInputDefinition & {
@@ -44,8 +49,6 @@ export type RadioInputDefinition = BaseInputDefinition & {
 export type CheckboxInputDefinition = BaseInputDefinition & {
     type: "BOOLEAN"
 }
-
-
 
 export type InputDefinition =
     TextInputDefinition

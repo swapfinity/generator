@@ -97,7 +97,7 @@
 						};
 
 						if (value instanceof z.ZodString) {
-							return { ...baseInput, type: 'TEXT' };
+							return { ...baseInput, type: 'TEXT', patterns: meta?.patterns };
 						} else if (value instanceof z.ZodNumber) {
 							return {
 								...baseInput,

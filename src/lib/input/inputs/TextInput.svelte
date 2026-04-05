@@ -1,14 +1,15 @@
 <script lang="ts">
-	import { FieldNotifications } from '$lib/generation/general/notifications';
+	import { GenerationNotifications } from '$lib/generation/general/notifications';
 	import type { TextInputDefinition } from '../input-types';
-	import InputHint from './InputHint.svelte';
+	import InputHint from '$lib/input/inputs/InputHint.svelte';
+	import type { LocalNotification } from '../local-notification-types';
 
 	interface TextInputProps {
 		inputDefinition: TextInputDefinition;
 		value: string;
 		onchange: (value: string) => void;
 		disabled?: boolean;
-		notifications?: FieldNotifications | null;
+		notifications?: GenerationNotifications | null;
 	}
 	let {
 		inputDefinition,
@@ -18,7 +19,30 @@
 		notifications
 	}: TextInputProps = $props();
 
-	const notification = $derived(notifications?.getFirst(inputDefinition.fieldName) ?? null);
+	const generationNotification = $derived(
+		notifications?.getFirst(inputDefinition.fieldName) ?? null
+	);
+
+	let localNotification = $state<LocalNotification | null>(null);
+	let errorTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	const handleInput = (e: Event) => {
+		const newValue = (e.currentTarget as HTMLInputElement).value;
+
+		for (const { pattern, message } of inputDefinition.patterns ?? []) {
+			if (!new RegExp(pattern).test(newValue)) {
+				(e.currentTarget as HTMLInputElement).value = value;
+				localNotification = { level: 'ERROR', message };
+				if (errorTimeout) {
+					clearTimeout(errorTimeout);
+				}
+				errorTimeout = setTimeout(() => (localNotification = null), 3000);
+				return;
+			}
+		}
+		localNotification = null;
+		onchange(newValue);
+	};
 </script>
 
 <div class="input-container" style={`flex: ${inputDefinition.rowWeight ?? 1} 1 0;`}>
@@ -28,13 +52,21 @@
 		id={inputDefinition.fieldName}
 		name={inputDefinition.fieldName}
 		{value}
-		oninput={(e) => onchange((e.currentTarget as HTMLInputElement).value)}
+		oninput={handleInput}
 		{disabled}
 		placeholder={inputDefinition.description}
-		aria-invalid={notification?.level === 'ERROR' ? 'true' : undefined}
-		class={notification?.level === 'WARN' ? 'warn' : undefined}
+		aria-invalid={generationNotification?.level === 'ERROR' || localNotification?.level === 'ERROR'
+			? 'true'
+			: undefined}
+		class={generationNotification?.level === 'WARN' || localNotification?.level === 'WARN'
+			? 'warn'
+			: undefined}
 	/>
-	<InputHint {notification} description={inputDefinition.description} />
+	<InputHint
+		{generationNotification}
+		{localNotification}
+		description={inputDefinition.description}
+	/>
 </div>
 
 <style lang="scss">

@@ -1,20 +1,16 @@
 <script lang="ts">
-	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	import { Download } from 'lucide-svelte';
 	// @ts-ignore
 	import * as stlSerializer from '@jscad/stl-serializer';
 	const { serialize, mimeType } = stlSerializer;
+	import type { GenerationResult } from '$lib/generation/types/generation-result';
 
 	interface ModelStlExporterProps {
-		geometryToRender: Geom3 | Geom3[] | null;
+		generationResult: GenerationResult | null;
 		fileName: string;
 	}
-	let { geometryToRender, fileName = 'model' }: ModelStlExporterProps = $props();
+	let { generationResult, fileName = 'model' }: ModelStlExporterProps = $props();
 	const fullFileName = $derived(`${fileName}.stl`);
-
-	const generateMesh = () => {
-		return serialize({}, geometryToRender);
-	};
 
 	const downloadAsFile = (content: BlobPart[], fileName: string, contentType: string) => {
 		const blob = new Blob(content, { type: contentType });
@@ -35,13 +31,17 @@
 	};
 
 	const handleButtonClick = () => {
-		const serializedGeometry = generateMesh();
+		if (!generationResult?.geometry) {
+			return;
+		}
+
+		const serializedGeometry = serialize({}, generationResult.geometry);
 		downloadAsFile(serializedGeometry, fullFileName, mimeType);
 	};
 </script>
 
-<button onclick={handleButtonClick} disabled={!geometryToRender} class="download-button">
-	{#if geometryToRender}
+<button onclick={handleButtonClick} disabled={!generationResult?.geometry} class="download-button">
+	{#if generationResult?.geometry}
 		<Download /> Download as STL
 	{:else}
 		<span aria-busy="true"></span>

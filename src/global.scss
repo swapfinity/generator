@@ -1,6 +1,12 @@
 @use "@picocss/pico/scss/pico" with ($theme-color: "indigo");
 @use "@picocss/pico/scss/pico.colors" as pico-colors;
 
+:root {
+    --color-warn: rgb(230, 166, 25);
+    --color-warn-dark: rgb(163, 106, 8);
+    --color-error: var(--pico-form-element-invalid-border-color);
+}
+
 html,
 body {
     margin: 0;
@@ -34,4 +40,10 @@ body {
     &:active {
         background-color: var(--pico-secondary-background);
     }
+}
+
+input.warn {
+    --pico-form-element-border-color: var(--color-warn);
+    --pico-form-element-active-border-color: var(--color-warn-dark);
+    --pico-form-element-focus-color: var(--color-warn-dark);
 }

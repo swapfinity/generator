@@ -7,6 +7,11 @@ import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
 import { getScrewTypeIcon } from '../screws/screw-type-icon-gen';
 import type { LabelDefinition } from '../../input/schemas/general-schemas';
 import type { ScrewLabelDefinition } from '$lib/input/schemas/screw-schema';
+import { calculateFontSizeFor } from './font-size-utils';
+import type { LabelPart2D } from '../types/label-part';
+import { PART_STATE_COLORS } from './part-state-colors';
+import type { GenerationResult } from '../types/generation-result';
+import { FieldNotifications } from './notifications';
 
 
 const x_length = 33.50
@@ -18,65 +23,159 @@ const tab_radius = tab_diameter / 2;
 const segments = 32;
 const label_thickness = 0.6;
 
-const main_text_thickness = 0.4;
+const LABEL_CONTENT_TICKNESS = 0.4;
 
 const screwTypeIconAndMainTextXOffset = -0.5
+
+const LABEL_PADDING = 1
+const LABEL_LINE_GAP = LABEL_PADDING;
+
+const MIN_CUSTOM_TEXT_TYPE_TEXT_SIZE = 5
+const MAX_CUSTOM_TEXT_TYPE_TEXT_SIZE = 8
 
 export const generateLabelGeometry = (
     labelDefinition: LabelDefinition,
     fonts: Fonts
-) => {
+): GenerationResult => {
     const labelBase3D = createLabelBase3D();
 
     switch (labelDefinition.type) {
         case "SCREW": {
-            const iconAndText2D = booleans.union(
-                createScrewDriveTextAndIcon(labelDefinition, fonts.extraBold),
-                createScrewTypeIconAndMainText(labelDefinition, fonts.extraBold)
-            )
-            const iconandText3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, iconAndText2D)));
-            return [labelBase3D, iconandText3D];
+            const notifications = new FieldNotifications();
+
+            const parts2D = [
+                ...createScrewDriveTextAndIcon(labelDefinition, fonts.extraBold),
+                ...createScrewTypeIconAndMainText(labelDefinition, fonts.extraBold),
+            ];
+
+            const parts3D = extrudeLabelContent(parts2D, notifications)
+
+            return { geometry: [labelBase3D, ...parts3D], notifications };
         }
 
         case "CUSTOMIZABLE_TEXT": {
             const firstLinePresent = Boolean(labelDefinition.firstLine)
             const secondLinePresent = Boolean(labelDefinition.secondLine)
 
+            const usableWidth = x_length - LABEL_PADDING * 2;
+            const usableHeight = y_length - LABEL_PADDING * 2;
+            const lineHeight = secondLinePresent ? (usableHeight - LABEL_LINE_GAP) / 2 : usableHeight;
+
             const result: Geom3[] = [labelBase3D]
+            const notifications = new FieldNotifications();
 
             // first line
             if (firstLinePresent) {
+                const firstLineY = secondLinePresent ? y_length / 4 : 0
+                const firstLine2D = buildTextLine({
+                    text: labelDefinition.firstLine,
+                    font: fonts[labelDefinition.firstLineFontWeight],
+                    autoSize: labelDefinition.firstLineAutoSize,
+                    requestedFontSize: labelDefinition.firstLineFontSize,
+                    availableWidth: usableWidth,
+                    availableHeight: lineHeight,
+                    baseY: firstLineY,
+                    xOffset: labelDefinition.firstLineXOffset,
+                    yOffset: labelDefinition.firstLineYOffset,
+                    fieldName: 'firstLine',
+                })
 
-                const firstLineY = (secondLinePresent ? y_length / 4 : 0) + labelDefinition.firstLineYOffset
-                const firstLine2D = transforms.translate(
-                    [labelDefinition.firstLineXOffset, firstLineY, 0],
-                    createText(labelDefinition.firstLine, fonts[labelDefinition.firstLineFontWeight], labelDefinition.firstLineFontSize)
-                )
-                const firstLine3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, firstLine2D)));
-
-                result.push(firstLine3D)
+                result.push(...extrudeLabelContent([firstLine2D], notifications))
             }
 
             // second line
             if (secondLinePresent) {
-                const secondLineY = -(y_length / 4) + labelDefinition.secondLineYOffset
-                const secondLine2D = transforms.translate(
-                    [labelDefinition.secondLineXOffset, secondLineY, 0],
-                    createText(labelDefinition.secondLine, fonts[labelDefinition.secondLineFontWeight], labelDefinition.secondLineFontSize)
-                )
-                const secondLine3D = transforms.translateZ(label_thickness, colors.colorize([0, 0, 0], extrusions.extrudeLinear({ height: main_text_thickness }, secondLine2D)));
+                const secondLineY = -(y_length / 4);
+                const secondLine2D = buildTextLine({
+                    text: labelDefinition.secondLine,
+                    font: fonts[labelDefinition.secondLineFontWeight],
+                    autoSize: labelDefinition.secondLineAutoSize,
+                    requestedFontSize: labelDefinition.secondLineFontSize,
+                    availableWidth: usableWidth,
+                    availableHeight: lineHeight,
+                    baseY: secondLineY,
+                    xOffset: labelDefinition.secondLineXOffset,
+                    yOffset: labelDefinition.secondLineYOffset,
+                    fieldName: 'secondLine',
+                });
 
-                result.push(secondLine3D)
+                result.push(...extrudeLabelContent([secondLine2D], notifications));
             }
 
-            return result
+            return { geometry: result, notifications: notifications }
         }
     }
 }
 
-// helpers
+// general helpers
+
+const TEXT_OVERSIZED_WARNING = 'Text too long, displaying at minimum font size'
+
+const extrudeLabelContent = (parts: LabelPart2D[], notifications: FieldNotifications): Geom3[] =>
+    parts.map((part) => {
+        notifications.addFromPart(part);
+
+        return transforms.translateZ(label_thickness,
+            colors.colorize(PART_STATE_COLORS[part.state] ?? [0, 0, 0],
+                extrusions.extrudeLinear({ height: LABEL_CONTENT_TICKNESS + (part.state !== 'OK' ? 0.001 : 0) }, part.geom)));
+    });
+
+// custom text helpers
+type LineConfig = {
+    text: string;
+    font: opentype.Font;
+    autoSize: boolean;
+    requestedFontSize: number;
+    availableWidth: number;
+    availableHeight: number;
+    baseY: number;
+    xOffset: number;
+    yOffset: number;
+    fieldName: string;
+};
+
+const buildTextLine = ({
+    text,
+    font,
+    autoSize,
+    requestedFontSize,
+    availableWidth,
+    availableHeight,
+    baseY,
+    xOffset,
+    yOffset,
+    fieldName,
+}: LineConfig): LabelPart2D => {
+    const autoCalculatedSize = autoSize
+        ? calculateFontSizeFor(
+            text,
+            font,
+            availableWidth,
+            availableHeight,
+            MIN_CUSTOM_TEXT_TYPE_TEXT_SIZE,
+            MAX_CUSTOM_TEXT_TYPE_TEXT_SIZE
+        )
+        : null;
+
+    const resolvedSize = autoSize ? autoCalculatedSize ?? MIN_CUSTOM_TEXT_TYPE_TEXT_SIZE : requestedFontSize;
+
+    const x = autoSize ? 0 : xOffset;
+    const y = baseY + (autoSize ? 0 : yOffset);
+    const geom2D = transforms.translate([x, y, 0], createText(text, font, resolvedSize));
+
+    if (autoSize && autoCalculatedSize === null) {
+        return { geom: geom2D, state: 'WARN', fieldName, message: TEXT_OVERSIZED_WARNING };
+    }
+
+    return { geom: geom2D, state: 'OK' }
+};
+
+// screw type helpers
 const screwDriveTextSize = 5
-const screwTypeTextSize = 6.7
+
+const MIN_SCREW_TYPE_TEXT_SIZE = 5
+const MAX_SCREW_TYPE_TEXT_SIZE = 6.7
+
 
 const createLabelBase3D = (): Geom3 => {
     const leftTab = primitives.circle({ radius: tab_radius, center: [-x_length / 2, 0], segments });
@@ -103,19 +202,19 @@ const createLabelBase3D = (): Geom3 => {
     return labelBase3D;
 }
 
-const createScrewDriveTextAndIcon = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
+const createScrewDriveTextAndIcon = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): LabelPart2D[] => {
     const withScrewDriveText = Boolean(labelDefinition.screwDriveText)
     const centerForIcon = getCenterForScrewDriveIcon(withScrewDriveText)
     const icon = transforms.translate(centerForIcon, getScrewDriveIcon(labelDefinition.screwDrive))
 
     if (withScrewDriveText) {
-        const screwDriveText2D = transforms.translate([-(x_length / 2 - x_length / 6), - y_length / 2 + screwDriveTextSize / 2.4, 0], createText(labelDefinition.screwDriveText!, boldFont, screwDriveTextSize))
-        return booleans.union(icon, screwDriveText2D)
+        const screwDriveText2D = transforms.translate([-(x_length / 2 - x_length / 6), - y_length / 2 + screwDriveTextSize / 2.4, 0], createText(labelDefinition.screwDriveText, boldFont, screwDriveTextSize))
+        return [{ geom: icon, state: 'OK', }, { geom: screwDriveText2D, state: 'OK' }]
 
     }
 
     else {
-        return icon
+        return [{ geom: icon, state: 'OK' }]
     }
 }
 
@@ -130,21 +229,35 @@ const getCenterForScrewDriveIcon = (withText: boolean): [number, number, number]
     }
 }
 
-const createScrewTypeIconAndMainText = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): Geom2 => {
+const createScrewTypeIconAndMainText = (labelDefinition: ScrewLabelDefinition, boldFont: opentype.Font): LabelPart2D[] => {
     const withScrewTypeText = Boolean(labelDefinition.screwMainText)
     const centerForIcon = getCenterForScrewTypeIcon(withScrewTypeText)
     const icon = transforms.translate(centerForIcon, getScrewTypeIcon(labelDefinition.screwType))
 
     if (withScrewTypeText) {
+        const calculatedFontSize = calculateFontSizeFor(
+            labelDefinition.screwMainText,
+            boldFont,
+            x_length / 3 * 2 - 1.5,
+            y_length / 2,
+            MIN_SCREW_TYPE_TEXT_SIZE,
+            MAX_SCREW_TYPE_TEXT_SIZE,
+            MAX_SCREW_TYPE_TEXT_SIZE
+        )
+
         const screwTypeText2D = transforms.translate(
             [x_length / 2 - x_length / 3 + screwTypeIconAndMainTextXOffset, -(y_length / 2 - y_length / 4), 0],
-            createText(labelDefinition.screwMainText, boldFont, screwTypeTextSize)
+            createText(labelDefinition.screwMainText, boldFont, calculatedFontSize ?? MIN_SCREW_TYPE_TEXT_SIZE)
         )
-        return booleans.union(icon, screwTypeText2D)
 
+        const textPart: LabelPart2D = calculatedFontSize
+            ? { geom: screwTypeText2D, state: 'OK' }
+            : { geom: screwTypeText2D, state: 'WARN', fieldName: 'screwMainText', message: TEXT_OVERSIZED_WARNING };
+
+        return [{ geom: icon, state: 'OK' }, textPart];
     }
     else {
-        return icon
+        return [{ geom: icon, state: 'OK' }]
 
     }
 }

@@ -13,7 +13,7 @@ const CURVE_STEPS = 32
 
 export function createText(text: string, font: opentype.Font, size = 10) {
 
-    const path = font.getPath(text, 0, 0, size, { kerning: true })
+    const path = createPath(text, font, size)
 
     const contours = flattenPath(path)
     const text2D: Geom2 = polygonFromPoints(contours)
@@ -23,6 +23,10 @@ export function createText(text: string, font: opentype.Font, size = 10) {
     const text2DCentered = transforms.center({ axes: [true, true, true] }, (text2DYMirrored))
 
     return text2DCentered
+}
+
+export const createPath = (text: string, font: opentype.Font, size = 10) => {
+    return font.getPath(text, 0, 0, size, { kerning: true })
 }
 
 function flattenPath(path: opentype.Path, steps = CURVE_STEPS): [number, number][][] {

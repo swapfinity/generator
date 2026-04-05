@@ -5,6 +5,7 @@
 	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { Focus } from 'lucide-svelte';
+	import type { GenerationResult } from '$lib/generation/types/generation-result';
 
 	// consts
 	const RESIZE_TIMEOUT_MS = 50;
@@ -26,9 +27,9 @@
 
 	// props
 	interface ModelViewerProps {
-		geometryToRender: Geom3 | Geom3[] | null;
+		generationResult: GenerationResult | null;
 	}
-	let { geometryToRender }: ModelViewerProps = $props();
+	let { generationResult }: ModelViewerProps = $props();
 
 	let viewerContainer: HTMLDivElement;
 	let resizeObserver: ResizeObserver;
@@ -45,6 +46,8 @@
 	let updateView: boolean = true; // initial update needed
 
 	let isRendererReady = $state(false);
+
+	const geometryToRender = $derived(generationResult?.geometry ?? null);
 
 	/**
 	 * Refresh the entities in the viewer on change.

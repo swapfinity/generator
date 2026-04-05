@@ -10,7 +10,7 @@
 	import { generateLabelGeometry } from '$lib/generation/general/label-gen';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
 	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
-	import { safeParseFromBase64 } from '$lib/shared/url-util';
+	import { safeParseFromBase64 } from '$lib/shared/utils/url-util';
 	import ModelViewer from '$lib/viewer/ModelViewer.svelte';
 	import { onMount } from 'svelte';
 
@@ -39,7 +39,7 @@
 		loading = false;
 	});
 
-	const geometryToRender = $derived.by(() => {
+	const generationResult = $derived.by(() => {
 		if (!fonts) {
 			return null;
 		}
@@ -61,15 +61,19 @@
 				<h1>Custom Labels</h1>
 				Create any custom label you need.
 			</div>
-			<SchemaBasedUserInput initialValue={userInput} onChange={handleFormChange} />
+			<SchemaBasedUserInput
+				initialValue={userInput}
+				onChange={handleFormChange}
+				{generationResult}
+			/>
 		</div>
-		<ModelStlExporter {geometryToRender} fileName="label" />
+		<ModelStlExporter {generationResult} fileName="label" />
 	</div>
 	<div class="viewer">
 		{#if loading}
 			<span aria-busy="true">Loading…</span>
-		{:else if geometryToRender}
-			<ModelViewer {geometryToRender} />
+		{:else if generationResult}
+			<ModelViewer {generationResult} />
 		{/if}
 	</div>
 </div>

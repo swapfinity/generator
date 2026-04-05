@@ -13,13 +13,16 @@
 	import NumberInput from './inputs/NumberInput.svelte';
 	import type { RowDefinition, RowDefinitions } from './row-types';
 	import ShareButton from '$lib/shared/components/ShareButton.svelte';
+	import type { GenerationResult } from '$lib/generation/types/generation-result';
+	import TextInput from './inputs/TextInput.svelte';
 
 	// props
 	interface SchemaBasedUserInputProps {
 		initialValue?: LabelDefinition;
 		onChange: (updated: LabelDefinition) => void;
+		generationResult: GenerationResult | null;
 	}
-	let { initialValue, onChange }: SchemaBasedUserInputProps = $props();
+	let { initialValue, onChange, generationResult }: SchemaBasedUserInputProps = $props();
 
 	const initialKey = (initialValue?.type ??
 		Object.keys(LABEL_SCHEMA_MAP)[0]) as keyof typeof LABEL_SCHEMA_MAP;
@@ -163,15 +166,13 @@
 	<div class="input-container">
 		{#each inputs as input (input.fieldName)}
 			{#if input.type === 'TEXT'}
-				<div class="text-input" style={`flex: ${input.rowWeight ?? 1} 1 0;`}>
-					<label for={input.fieldName}>{input.viewName}</label>
-					<input
-						type="text"
-						placeholder={input.description}
-						name={input.fieldName}
-						bind:value={result[input.fieldName]}
-					/>
-				</div>
+				<TextInput
+					inputDefinition={input}
+					value={result[input.fieldName]}
+					onchange={(v) => (result[input.fieldName] = v)}
+					disabled={isInputDisabled(input)}
+					notifications={generationResult?.notifications}
+				/>
 			{:else if input.type === 'NUMBER'}
 				<NumberInput
 					inputDefinition={input}

@@ -138,13 +138,20 @@ const secondLineYOffset = z
 
 export const CustomizableTextLabelSchema = z.object({
     type: z.literal("CUSTOMIZABLE_TEXT").default("CUSTOMIZABLE_TEXT"),
-    firstLine: z.string().default("Label Text").meta({ viewName: "First Line" }),
+    firstLine: z.string().default("Label Text").meta({
+        viewName: "First Line",
+        patterns: [{ pattern: '^.{0,25}$', message: 'Maximum 25 characters' }]
+    }),
     firstLineFontWeight: firstLineFontType,
     firstLineAutoSize,
     firstLineFontSize,
     firstLineXOffset,
     firstLineYOffset,
-    secondLine: z.string().default("").describe("Additional Line of Text - Optional").meta({ viewName: "Second Line", rowName: "secondLine" }),
+    secondLine: z.string().default("").describe("Additional Line of Text - Optional").meta({
+        viewName: "Second Line",
+        rowName: "secondLine",
+        patterns: [{ pattern: '^.{0,25}$', message: 'Maximum 25 characters' }]
+    }),
     secondLineFontWeight: secondLineFontType,
     secondLineAutoSize,
     secondLineFontSize,

@@ -1,16 +1,20 @@
 <script lang="ts">
-	import type { FieldNotification } from '$lib/generation/general/notifications';
+	import type { GenerationNotification } from '$lib/generation/general/notifications';
+	import type { LocalNotification } from '../local-notification-types';
 
 	// props
 	interface InputHintProps {
-		notification?: FieldNotification | null;
+		generationNotification?: GenerationNotification | null;
+		localNotification?: LocalNotification | null;
 		description?: string;
 	}
-	let { notification, description }: InputHintProps = $props();
+	let { generationNotification, localNotification, description }: InputHintProps = $props();
 </script>
 
-{#if notification}
-	<small class={notification.level.toLowerCase()}>{notification.message}</small>
+{#if localNotification}
+	<small class={localNotification.level.toLowerCase()}>{localNotification.message}</small>
+{:else if generationNotification}
+	<small class={generationNotification.level.toLowerCase()}>{generationNotification.message}</small>
 {:else if description}
 	<small>{description}</small>
 {/if}

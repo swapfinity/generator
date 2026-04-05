@@ -38,13 +38,21 @@ const screwType = z
 const screwDriveText = z
     .string()
     .default("")
-    .meta({ viewName: "Screw Drive Description Text (Optional)", rowWeight: 2, rowName: "screwDrive" })
+    .meta({
+        viewName: "Screw Drive Description Text (Optional)",
+        rowWeight: 2, rowName: "screwDrive",
+        patterns: [{ pattern: '^.{0,3}$', message: 'Maximum 3 characters' }]
+    })
     .describe("The text specifying the drive type of the screw.")
 
 const screwHeadTypeText = z
     .string()
     .default("")
-    .meta({ viewName: "Screw Description Text (Optional)", rowWeight: 2, rowName: "screwType" })
+    .meta({
+        viewName: "Screw Description Text (Optional)",
+        rowWeight: 2, rowName: "screwType",
+        patterns: [{ pattern: '^.{0,15}$', message: 'Maximum 15 characters' }]
+    })
     .describe("The main text describing the screw.")
 
 

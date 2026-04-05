@@ -3,7 +3,7 @@ import * as jscad from '@jscad/modeling';
 const { booleans, colors, extrusions, primitives, transforms, geometries } = jscad;
 import { createText, type Fonts } from './font-utils';
 import { getScrewDriveIcon, ICON_CIRCLE_RADIUS } from '../screws/screw-drive-icon-gen';
-import type { Geom2, Geom3 } from '@jscad/modeling/src/geometries/types';
+import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 import { getScrewTypeIcon } from '../screws/screw-type-icon-gen';
 import type { LabelDefinition } from '../../input/schemas/general-schemas';
 import type { ScrewLabelDefinition } from '$lib/input/schemas/screw-schema';
@@ -11,7 +11,7 @@ import { calculateFontSizeFor } from './font-size-utils';
 import type { LabelPart2D } from '../types/label-part';
 import { PART_STATE_COLORS } from './part-state-colors';
 import type { GenerationResult } from '../types/generation-result';
-import { FieldNotifications } from './notifications';
+import { GenerationNotifications } from './notifications';
 
 
 const x_length = 33.50
@@ -41,7 +41,7 @@ export const generateLabelGeometry = (
 
     switch (labelDefinition.type) {
         case "SCREW": {
-            const notifications = new FieldNotifications();
+            const notifications = new GenerationNotifications();
 
             const parts2D = [
                 ...createScrewDriveTextAndIcon(labelDefinition, fonts.extraBold),
@@ -62,7 +62,7 @@ export const generateLabelGeometry = (
             const lineHeight = secondLinePresent ? (usableHeight - LABEL_LINE_GAP) / 2 : usableHeight;
 
             const result: Geom3[] = [labelBase3D]
-            const notifications = new FieldNotifications();
+            const notifications = new GenerationNotifications();
 
             // first line
             if (firstLinePresent) {
@@ -111,7 +111,7 @@ export const generateLabelGeometry = (
 
 const TEXT_OVERSIZED_WARNING = 'Text too long, displaying at minimum font size'
 
-const extrudeLabelContent = (parts: LabelPart2D[], notifications: FieldNotifications): Geom3[] =>
+const extrudeLabelContent = (parts: LabelPart2D[], notifications: GenerationNotifications): Geom3[] =>
     parts.map((part) => {
         notifications.addFromPart(part);
 

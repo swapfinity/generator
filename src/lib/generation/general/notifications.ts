@@ -8,15 +8,15 @@ const LEVEL_PRIORITY: Record<NotificationLevel, number> = {
     INFO: 2,
 };
 
-export type FieldNotification = {
+export type GenerationNotification = {
     level: NotificationLevel;
     message: string;
 };
 
-export class FieldNotifications {
-    private record: Record<string, FieldNotification[]> = {};
+export class GenerationNotifications {
+    private record: Record<string, GenerationNotification[]> = {};
 
-    add(fieldName: string, notification: FieldNotification) {
+    add(fieldName: string, notification: GenerationNotification) {
         if (!this.record[fieldName]) {
             this.record[fieldName] = [];
         }
@@ -31,11 +31,11 @@ export class FieldNotifications {
         }
     }
 
-    get(fieldName: string): FieldNotification[] {
+    get(fieldName: string): GenerationNotification[] {
         return this.record[fieldName] ?? [];
     }
 
-    getFirst(fieldName: string): FieldNotification | null {
+    getFirst(fieldName: string): GenerationNotification | null {
         return this.get(fieldName)[0] ?? null;
     }
 

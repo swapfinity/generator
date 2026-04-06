@@ -35,8 +35,10 @@ const firstLineFontSize = z
         rowName: "firstLineFontProps",
         rowWeight: 2,
         disabledWhen: { field: "firstLineAutoSize", when: true },
-        min: 1,
-        max: 15,
+        softMin: 5,
+        softMax: 15,
+        min: 4,
+        max: 20,
         step: 0.1,
     });
 
@@ -49,8 +51,10 @@ const firstLineXOffset = z
         rowName: "firstLineFontProps",
         rowWeight: 3,
         disabledWhen: { field: "firstLineAutoSize", when: true },
-        min: -50,
-        max: 50,
+        softMin: -15,
+        softMax: 15,
+        min: -20,
+        max: 20,
         step: 0.1,
     });
 
@@ -63,8 +67,10 @@ const firstLineYOffset = z
         rowName: "firstLineFontProps",
         rowWeight: 3,
         disabledWhen: { field: "firstLineAutoSize", when: true },
-        min: -50,
-        max: 50,
+        softMin: -15,
+        softMax: 15,
+        min: -20,
+        max: 20,
         step: 0.1,
     });
 
@@ -103,8 +109,10 @@ const secondLineFontSize = z
         rowName: "secondLineFontProps",
         rowWeight: 2,
         disabledWhen: { field: "secondLineAutoSize", when: true },
-        min: 1,
-        max: 15,
+        softMin: 5,
+        softMax: 15,
+        min: 4,
+        max: 20,
         step: 0.1,
     });
 
@@ -117,8 +125,10 @@ const secondLineXOffset = z
         rowName: "secondLineFontProps",
         rowWeight: 3,
         disabledWhen: { field: "secondLineAutoSize", when: true },
-        min: -50,
-        max: 50,
+        softMin: -15,
+        softMax: 15,
+        min: -20,
+        max: 20,
         step: 0.1,
     });
 
@@ -131,8 +141,10 @@ const secondLineYOffset = z
         rowName: "secondLineFontProps",
         rowWeight: 3,
         disabledWhen: { field: "secondLineAutoSize", when: true },
-        min: -50,
-        max: 50,
+        softMin: -15,
+        softMax: 15,
+        min: -20,
+        max: 20,
         step: 0.1,
     });
 

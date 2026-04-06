@@ -28,10 +28,12 @@ export type TextInputDefinition = BaseInputDefinition & {
 }
 
 export type NumberInputDefinition = BaseInputDefinition & {
-    type: "NUMBER"
-    min?: number
-    max?: number
-    step?: number
+    type: "NUMBER";
+    min?: number;
+    max?: number;
+    softMin?: number;
+    softMax?: number;
+    step?: number;
 }
 
 export type SelectInputDefinition = BaseInputDefinition & {

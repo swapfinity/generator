@@ -102,6 +102,8 @@
 							return {
 								...baseInput,
 								type: 'NUMBER',
+								softMin: meta?.softMin,
+								softMax: meta?.softMax,
 								min: meta?.min,
 								max: meta?.max,
 								step: meta?.step

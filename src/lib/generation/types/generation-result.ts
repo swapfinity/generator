@@ -6,4 +6,5 @@ export type NotificationLevel = 'INFO' | 'WARN' | 'ERROR';
 export type GenerationResult = {
     geometry: Geom3[];
     notifications?: GenerationNotifications;
+    timeSpent?: number;
 };

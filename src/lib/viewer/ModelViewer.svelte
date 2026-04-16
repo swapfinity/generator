@@ -6,6 +6,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { Focus } from 'lucide-svelte';
 	import type { GenerationResult } from '$lib/generation/types/generation-result';
+	import { hover } from '$lib/shared/has-hover.svelte';
 
 	// consts
 	const RESIZE_TIMEOUT_MS = 50;
@@ -262,6 +263,14 @@
 
 <div class="viewer-container">
 	<div bind:this={viewerContainer} class="jscad-container"></div>
+	{#if generationResult?.timeSpent}
+		<div
+			class="time-spent-display"
+			data-tooltip={hover.present ? 'Time spent for generation' : undefined}
+		>
+			{generationResult.timeSpent} ms
+		</div>
+	{/if}
 	<button class="reset-view-button icon-button" onclick={fitCameraToGeometry}>
 		<Focus />
 	</button>
@@ -288,5 +297,17 @@
 		position: absolute;
 		bottom: 0.5rem;
 		right: 0.5rem;
+	}
+
+	.time-spent-display {
+		position: absolute;
+		bottom: 0.75rem;
+		left: 0.25rem;
+		padding: 0.25rem 0.75rem;
+		font-size: 0.75rem;
+		color: var(--pico-muted-color);
+		&[data-tooltip] {
+			border-bottom: none;
+		}
 	}
 </style>

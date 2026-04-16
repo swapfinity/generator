@@ -37,6 +37,7 @@ export const generateLabelGeometry = (
     labelDefinition: LabelDefinition,
     fonts: Fonts
 ): GenerationResult => {
+    const startTime = performance.now()
     const labelBase3D = createLabelBase3D();
 
     switch (labelDefinition.type) {
@@ -50,7 +51,8 @@ export const generateLabelGeometry = (
 
             const parts3D = extrudeLabelContent(parts2D, notifications)
 
-            return { geometry: [labelBase3D, ...parts3D], notifications };
+            const timeSpent = performance.now() - startTime;
+            return { geometry: [labelBase3D, ...parts3D], notifications, timeSpent };
         }
 
         case "CUSTOMIZABLE_TEXT": {
@@ -102,7 +104,8 @@ export const generateLabelGeometry = (
                 result.push(...extrudeLabelContent([secondLine2D], notifications));
             }
 
-            return { geometry: result, notifications: notifications }
+            const timeSpent = performance.now() - startTime;
+            return { geometry: result, notifications: notifications, timeSpent }
         }
     }
 }

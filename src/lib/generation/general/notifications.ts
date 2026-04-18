@@ -1,5 +1,3 @@
-import type { LabelPart2D } from "../types/label-part";
-
 export type NotificationLevel = 'INFO' | 'WARN' | 'ERROR';
 
 const LEVEL_PRIORITY: Record<NotificationLevel, number> = {
@@ -23,12 +21,6 @@ export class GenerationNotifications {
 
         this.record[fieldName].push(notification);
         this.record[fieldName].sort((a, b) => LEVEL_PRIORITY[a.level] - LEVEL_PRIORITY[b.level]);
-    }
-
-    addFromPart(part: LabelPart2D) {
-        if (part.state !== 'OK') {
-            this.add(part.fieldName, { level: toNotificationLevel(part.state), message: part.message });
-        }
     }
 
     get(fieldName: string): GenerationNotification[] {

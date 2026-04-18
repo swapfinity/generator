@@ -263,12 +263,12 @@
 
 <div class="viewer-container">
 	<div bind:this={viewerContainer} class="jscad-container"></div>
-	{#if generationResult?.timeSpent}
+	{#if generationResult?.timeSpent != null}
 		<div
 			class="time-spent-display"
 			data-tooltip={hover.present ? 'Time spent for generation' : undefined}
 		>
-			{generationResult.timeSpent} ms
+			{generationResult.timeSpent < 1 ? '<1' : generationResult.timeSpent} ms
 		</div>
 	{/if}
 	<button class="reset-view-button icon-button" onclick={fitCameraToGeometry}>

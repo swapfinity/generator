@@ -7,7 +7,7 @@
 		loadOverpassRegularFont,
 		type Fonts
 	} from '$lib/generation/general/font-utils';
-	import { generateLabelGeometry } from '$lib/generation/general/label-gen';
+	import { LabelGenerator } from '$lib/generation/general/label-gen';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
 	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
 	import { safeParseFromBase64 } from '$lib/shared/utils/url-util';
@@ -39,12 +39,13 @@
 		loading = false;
 	});
 
+	const generator = new LabelGenerator();
 	const generationResult = $derived.by(() => {
 		if (!fonts) {
 			return null;
 		}
 
-		return generateLabelGeometry(userInput, fonts);
+		return generator.generate(userInput, fonts);
 	});
 
 	const handleFormChange = (updatedUserInput: LabelDefinition) => {

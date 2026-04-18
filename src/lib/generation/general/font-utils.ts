@@ -26,8 +26,8 @@ export function createText(text: string, font: opentype.Font, size = 10) {
 }
 
 export const createPath = (text: string, font: opentype.Font, size = 10) => {
-    return font.getPath(text, 0, 0, size, { kerning: true })
-}
+    return font.getPath(text, 0, 0, size, { kerning: true });
+};
 
 function flattenPath(path: opentype.Path, steps = CURVE_STEPS): [number, number][][] {
     const polygons: [number, number][][] = []
@@ -117,4 +117,21 @@ export interface Fonts {
     regular: opentype.Font
     bold: opentype.Font
     extraBold: opentype.Font
+}
+
+const getFontId = (font: opentype.Font): string | null =>
+    font.names?.postScriptName?.en ??
+    font.names?.fullName?.en ??
+    Object.values(font.names?.postScriptName ?? {})[0] ??
+    Object.values(font.names?.fullName ?? {})[0] ??
+    null;
+
+export const createTextCacheKey = (text: string, font: opentype.Font, size: number): string => {
+    const fontId = getFontId(font);
+
+    if (!fontId) {
+        throw new Error("Font has no usable identifier (postScriptName/fullName missing)");
+    }
+
+    return `${fontId}|${size}|${text.normalize("NFC")}`;
 }

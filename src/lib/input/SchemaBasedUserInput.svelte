@@ -65,6 +65,9 @@
 					let defaultValue = undefined;
 					// @ts-ignore
 					const meta = value?.meta();
+					if (meta && meta.hidden) {
+						return null;
+					}
 
 					while (true) {
 						if (value instanceof z.ZodOptional) {

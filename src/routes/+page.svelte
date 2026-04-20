@@ -8,6 +8,7 @@
 		type Fonts
 	} from '$lib/generation/general/font-utils';
 	import { LabelGenerator } from '$lib/generation/general/label-gen';
+	import AddToPackageButton from '$lib/input/package/AddToPackageButton.svelte';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
 	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
 	import { safeParseFromBase64 } from '$lib/shared/utils/url-util';
@@ -68,7 +69,14 @@
 				{generationResult}
 			/>
 		</div>
-		<ModelStlExporter {generationResult} fileName="label" />
+		<div class="action-container">
+			<div class="download-button-container">
+				<ModelStlExporter {generationResult} fileName="label" />
+			</div>
+			<div class="add-to-package-button-container">
+				<AddToPackageButton labelDefinition={userInput} />
+			</div>
+		</div>
 	</div>
 	<div class="viewer">
 		{#if loading}
@@ -119,5 +127,18 @@
 
 	.description {
 		padding-bottom: calc(var(--pico-spacing) * 3);
+	}
+
+	.action-container {
+		display: flex;
+		align-items: center;
+		gap: var(--pico-spacing);
+	}
+	.download-button-container {
+		flex: 3 0 auto;
+	}
+
+	.add-to-package-button-container {
+		flex: 1 0 auto;
 	}
 </style>

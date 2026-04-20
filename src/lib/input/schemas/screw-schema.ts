@@ -45,7 +45,7 @@ const screwDriveText = z
     })
     .describe("The text specifying the drive type of the screw.")
 
-const screwHeadTypeText = z
+const screwMainText = z
     .string()
     .default("")
     .meta({
@@ -61,7 +61,7 @@ export const ScrewLabelSchema = z.object({
     screwDrive: screwDrive,
     screwDriveText: screwDriveText,
     screwType: screwType,
-    screwMainText: screwHeadTypeText,
+    screwMainText: screwMainText,
 });
 
 // types

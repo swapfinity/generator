@@ -1,5 +1,10 @@
+<script>
+	import PackageDrawer from '$lib/input/package/PackageDrawer.svelte';
+</script>
+
 <div class="header-container bottom-divider">
 	<div class="highlight logo">Swapfinity Label Generator</div>
+	<PackageDrawer />
 </div>
 
 <style lang="scss">

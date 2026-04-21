@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import ModelStlExporter from '$lib/exporter/ModelStlExporter.svelte';
 	import {
 		loadOverpassBoldFont,
@@ -10,24 +11,18 @@
 	import { LabelGenerator } from '$lib/generation/general/label-gen';
 	import AddToPackageButton from '$lib/input/package/AddToPackageButton.svelte';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
-	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
-	import { safeParseFromBase64 } from '$lib/shared/utils/url-util';
+	import { type LabelDefinition } from '$lib/input/schemas/general-schemas';
+	import { safeParseFromBase64, USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 	import ModelViewer from '$lib/viewer/ModelViewer.svelte';
 	import { onMount } from 'svelte';
-
-	const URL_PARAM_NAME = 'input';
 
 	let fonts = $state<Fonts | null>(null);
 	let loading = $state<boolean>(true);
 
-	const param = new URLSearchParams(window.location.search).get(URL_PARAM_NAME);
-	const parsedParam = safeParseFromBase64<LabelDefinition>(param);
-
-	if (param && !parsedParam) {
-		goto('', { replaceState: true });
-	}
-
-	let userInput = $state<LabelDefinition>(parsedParam as LabelDefinition);
+	const userInput: LabelDefinition = $derived.by(() => {
+		const param = $page.url.searchParams.get(USER_INPUT_PARAM_NAME);
+		return safeParseFromBase64<LabelDefinition>(param) ?? ({} as LabelDefinition);
+	});
 
 	onMount(async () => {
 		const [regular, bold, extraBold] = await Promise.all([
@@ -50,9 +45,12 @@
 	});
 
 	const handleFormChange = (updatedUserInput: LabelDefinition) => {
-		userInput = updatedUserInput;
 		const encoded = btoa(JSON.stringify(updatedUserInput));
-		goto(`?${URL_PARAM_NAME}=${encoded}`, { replaceState: true, noScroll: true, keepFocus: true });
+		goto(`?${USER_INPUT_PARAM_NAME}=${encoded}`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
 	};
 </script>
 
@@ -63,11 +61,7 @@
 				<h1>Custom Labels</h1>
 				Create any custom label you need.
 			</div>
-			<SchemaBasedUserInput
-				initialValue={userInput}
-				onChange={handleFormChange}
-				{generationResult}
-			/>
+			<SchemaBasedUserInput value={userInput} onChange={handleFormChange} {generationResult} />
 		</div>
 		<div class="action-container">
 			<div class="download-button-container">

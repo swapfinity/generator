@@ -18,27 +18,15 @@
 
 	// props
 	interface SchemaBasedUserInputProps {
-		initialValue?: LabelDefinition;
+		value: LabelDefinition & Record<string, any>;
 		onChange: (updated: LabelDefinition) => void;
 		generationResult: GenerationResult | null;
 	}
-	let { initialValue, onChange, generationResult }: SchemaBasedUserInputProps = $props();
+	let { value, onChange, generationResult }: SchemaBasedUserInputProps = $props();
 
-	const initialKey = (initialValue?.type ??
-		Object.keys(LABEL_SCHEMA_MAP)[0]) as keyof typeof LABEL_SCHEMA_MAP;
-
-	let selectedKey = $state<keyof typeof LABEL_SCHEMA_MAP>(initialKey);
+	let selectedKey = $derived(value.type);
 
 	let derivedSchema = $derived(LABEL_SCHEMA_MAP[selectedKey].schema);
-	let result = $state<LabelDefinition & Record<string, any>>(
-		LABEL_SCHEMA_MAP[initialKey].schema.parse(initialValue ?? {})
-	);
-
-	$effect(() => {
-		const currentResult = $state.snapshot(result);
-
-		onChange(currentResult as LabelDefinition);
-	});
 
 	const groupByRow = (inputs: InputDefinition[]): Record<string, InputDefinition[]> => {
 		const rows: Record<string, InputDefinition[]> = {};
@@ -142,18 +130,24 @@
 		(derivedSchema.meta?.() as ObjectMeta | undefined)?.rows ?? {}
 	);
 
+	const handleOnFieldChange = (field: string, newValue: unknown) => {
+		onChange({ ...value, [field]: newValue } as LabelDefinition);
+	};
+
 	const handleOnSchemaSelect = (event: Event) => {
 		const target = event.currentTarget as HTMLSelectElement;
-		selectedKey = target.value as keyof typeof LABEL_SCHEMA_MAP;
-		result = LABEL_SCHEMA_MAP[selectedKey].schema.parse({});
+		const key = target.value as keyof typeof LABEL_SCHEMA_MAP;
+		onChange(LABEL_SCHEMA_MAP[key].schema.parse({}));
 	};
 
 	const reset = () => {
-		result = LABEL_SCHEMA_MAP[selectedKey].schema.parse({});
+		onChange(LABEL_SCHEMA_MAP[value.type].schema.parse({}));
 	};
 
 	const isInputDisabled = (input: InputDefinition) =>
-		input.disabledWhen ? result[input.disabledWhen.field] === input.disabledWhen.when : false;
+		input.disabledWhen
+			? (value as Record<string, unknown>)[input.disabledWhen.field] === input.disabledWhen.when
+			: false;
 </script>
 
 {#snippet rowContent(rowDef: RowDefinition | undefined, inputs: InputDefinition[])}
@@ -173,37 +167,37 @@
 			{#if input.type === 'TEXT'}
 				<TextInput
 					inputDefinition={input}
-					value={result[input.fieldName]}
-					onchange={(v) => (result[input.fieldName] = v)}
+					value={value[input.fieldName]}
+					onchange={(v) => handleOnFieldChange(input.fieldName, v)}
 					disabled={isInputDisabled(input)}
 					notifications={generationResult?.notifications}
 				/>
 			{:else if input.type === 'NUMBER'}
 				<NumberInput
 					inputDefinition={input}
-					value={result[input.fieldName]}
-					onchange={(v) => (result[input.fieldName] = v)}
+					value={value[input.fieldName]}
+					onchange={(v) => handleOnFieldChange(input.fieldName, v)}
 					disabled={isInputDisabled(input)}
 				/>
 			{:else if input.type === 'BOOLEAN'}
 				<CheckboxInput
 					inputDefinition={input}
-					value={result[input.fieldName]}
-					onchange={(v) => (result[input.fieldName] = v)}
+					value={value[input.fieldName]}
+					onchange={(v) => handleOnFieldChange(input.fieldName, v)}
 					disabled={isInputDisabled(input)}
 				/>
 			{:else if input.type === 'SELECT'}
 				<SelectInput
 					inputDefinition={input}
-					value={result[input.fieldName]}
-					onchange={(v) => (result[input.fieldName] = v)}
+					value={value[input.fieldName]}
+					onchange={(v) => handleOnFieldChange(input.fieldName, v)}
 					disabled={isInputDisabled(input)}
 				/>
 			{:else if input.type === 'RADIO'}
 				<RadioInput
 					inputDefinition={input}
-					value={result[input.fieldName]}
-					onchange={(v) => (result[input.fieldName] = v)}
+					value={value[input.fieldName]}
+					onchange={(v) => handleOnFieldChange(input.fieldName, v)}
 					disabled={isInputDisabled(input)}
 				/>
 			{/if}

@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { Package, Trash } from 'lucide-svelte';
+	import { FileBox, Package, Trash, X } from 'lucide-svelte';
 	import { packageStore } from './package.svelte';
 	import { fly } from 'svelte/transition';
+	import type { LabelDefinition } from '../schemas/general-schemas';
+	import { goto } from '$app/navigation';
+	import { USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 
 	let isOpen = $state(false);
 
@@ -11,6 +14,16 @@
 
 	const closeDrawer = () => {
 		isOpen = false;
+	};
+
+	const openInEditor = (labelDefinition: LabelDefinition) => {
+		const encoded = btoa(JSON.stringify(labelDefinition));
+		closeDrawer();
+		goto(`?${USER_INPUT_PARAM_NAME}=${encoded}`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
 	};
 </script>
 
@@ -26,7 +39,7 @@
 	<div class="drawer" in:fly={{ x: 640, duration: 250 }} out:fly={{ x: 640, duration: 250 }}>
 		<div class="drawer-header">
 			<h2>Package</h2>
-			<button class="icon-button" onclick={closeDrawer}>✕</button>
+			<button class="icon-button" onclick={closeDrawer}><X /></button>
 		</div>
 		<div class="drawer-content">
 			{#if packageStore.labels.length === 0}
@@ -35,9 +48,14 @@
 				{#each packageStore.labels as label, i}
 					<div class="drawer-item">
 						<span>{packageStore.filenames[i]}</span>
-						<button class="icon-button" onclick={() => packageStore.remove(i)}>
-							<Trash />
-						</button>
+						<div class="action-container">
+							<button class="icon-button" onclick={() => openInEditor(label)}>
+								<FileBox />
+							</button>
+							<button class="icon-button" onclick={() => packageStore.remove(i)}>
+								<Trash />
+							</button>
+						</div>
 					</div>
 				{/each}
 			{/if}
@@ -48,14 +66,14 @@
 <style lang="scss">
 	.badge {
 		position: absolute;
-		top: 0.8rem;
-		right: 1rem;
+		top: 0.7rem;
+		right: 0.8rem;
 		background: var(--pico-primary);
 		color: white;
 		border-radius: 50%;
 		font-size: 0.7rem;
-		width: 1.1rem;
-		height: 1.1rem;
+		width: 1.2rem;
+		height: 1.2rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -73,7 +91,7 @@
 		top: 0;
 		right: 0;
 		height: 100%;
-		width: 640px;
+		width: 768px;
 		background: var(--pico-background-color);
 		z-index: 11;
 		display: flex;
@@ -99,5 +117,10 @@
 		align-items: center;
 		padding: 0.5rem 0;
 		border-bottom: 1px solid var(--pico-muted-border-color);
+	}
+
+	.action-container {
+		display: flex;
+		align-items: center;
 	}
 </style>

@@ -14,11 +14,12 @@ export const LABEL_SCHEMA_MAP: Record<LabelType, LabelSchemaEntry> = {
 };
 
 export const LabelDefinitionSchema = z.discriminatedUnion("type", [ScrewLabelSchema, CustomizableTextLabelSchema]);
+type LabelDefinitionSchema = typeof ScrewLabelSchema | typeof CustomizableTextLabelSchema;
 export type LabelDefinition = z.infer<typeof LabelDefinitionSchema>;
 export type LabelType = LabelDefinition['type'];
 export interface LabelSchemaEntry {
     displayName: string;
-    schema: any;
+    schema: LabelDefinitionSchema;
     nameTemplate?: string;
 }
 

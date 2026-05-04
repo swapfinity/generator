@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Download } from 'lucide-svelte';
-	// @ts-ignore
-	import * as stlSerializer from '@jscad/stl-serializer';
-	const { serialize, mimeType } = stlSerializer;
+
 	import type { GenerationResult } from '$lib/generation/types/generation-result';
+	import { downloadBinaryAsFile } from '../util/download-util';
+	import { serializeToStlBinary, STL_MIME_TYPE } from '../util/stl-export-util';
 
 	interface ModelStlExporterProps {
 		generationResult: GenerationResult | null;
@@ -12,31 +12,13 @@
 	let { generationResult, fileName = 'model' }: ModelStlExporterProps = $props();
 	const fullFileName = $derived(`${fileName}.stl`);
 
-	const downloadAsFile = (content: BlobPart[], fileName: string, contentType: string) => {
-		const blob = new Blob(content, { type: contentType });
-		const url = URL.createObjectURL(blob);
-
-		// create temporary element & trigger download
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = fileName;
-		a.style.display = 'none';
-
-		document.body.appendChild(a);
-		a.click();
-
-		// clean up
-		document.body.removeChild(a);
-		URL.revokeObjectURL(url);
-	};
-
 	const handleButtonClick = () => {
 		if (!generationResult?.geometry) {
 			return;
 		}
 
-		const serializedGeometry = serialize({}, generationResult.geometry);
-		downloadAsFile(serializedGeometry, fullFileName, mimeType);
+		const serializedGeometry = serializeToStlBinary(generationResult.geometry);
+		downloadBinaryAsFile(serializedGeometry, fullFileName, STL_MIME_TYPE);
 	};
 </script>
 

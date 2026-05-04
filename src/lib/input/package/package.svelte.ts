@@ -3,14 +3,12 @@ import { parseTemplate } from "$lib/shared/utils/template-util";
 import { packageSchema } from "../schemas/package-schema";
 
 const LABEL_PACKAGE_KEY = "swapfinity-label-generator:package"
-const LABEL_PACKAGE_MAX_SIZE = 100
-
-const isDeepEqual = (a: LabelDefinition, b: LabelDefinition): boolean => JSON.stringify(a) === JSON.stringify(b);
+const LABEL_PACKAGE_MAX_SIZE = 99
 
 class Package {
     labels = $state<LabelDefinition[]>([]);
 
-    filenames = $derived.by(() => {
+    private filenames = $derived.by(() => {
         const nameCount = new Map<string, number>();
         let genericCounter = 0;
 
@@ -19,7 +17,10 @@ class Package {
 
             if (entry.nameTemplate) {
                 let baseName = parseTemplate(entry.nameTemplate, label);
-                baseName = baseName.replace(/[\\/:"*?<>|]/g, '_').trim();
+                baseName = baseName
+                    .replace(/[\\/:"*?<>|]/g, '_')
+                    .replace(/\s+/g, '_')
+                    .trim();
 
                 const count = nameCount.get(baseName) ?? 0;
                 nameCount.set(baseName, count + 1);
@@ -31,6 +32,8 @@ class Package {
             }
         });
     });
+
+    entries = $derived<LabelEntry[]>(this.labels.map((label, i) => ({ label, filename: this.filenames[i] })));
 
     constructor(private maxSize: number = LABEL_PACKAGE_MAX_SIZE) {
         this.labels = this.load();
@@ -48,7 +51,7 @@ class Package {
         if (!label || this.labels.length >= this.maxSize || this.contains(label)) {
             return;
         }
-        this.labels.push(label);
+        this.labels.unshift(label);
         this.save();
     }
 
@@ -71,7 +74,11 @@ class Package {
     }
 
     get isFull(): boolean {
-        return this.labels.length >= this.maxSize;
+        return this.count >= this.maxSize;
+    }
+
+    get isEmpty(): boolean {
+        return this.count <= 0;
     }
 
     private save(): void {
@@ -92,3 +99,11 @@ class Package {
 }
 
 export const packageStore = new Package();
+
+// helpers
+export type LabelEntry = {
+    label: LabelDefinition;
+    filename: string;
+};
+
+const isDeepEqual = (a: LabelDefinition, b: LabelDefinition): boolean => JSON.stringify(a) === JSON.stringify(b);

@@ -1,5 +1,4 @@
 import { LABEL_SCHEMA_MAP } from '$lib/input/schemas/general-schemas';
-import { safeParseFromBase64 } from '$lib/shared/utils/url-util';
 import { USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 import { redirect } from '@sveltejs/kit';
 

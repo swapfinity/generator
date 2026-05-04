@@ -1,47 +1,35 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import ModelStlExporter from '$lib/exporter/ModelStlExporter.svelte';
-	import {
-		loadOverpassBoldFont,
-		loadOverpassExtraBoldFont,
-		loadOverpassRegularFont,
-		type Fonts
-	} from '$lib/generation/general/font-utils';
-	import { LabelGenerator } from '$lib/generation/general/label-gen';
-	import AddToPackageButton from '$lib/input/package/AddToPackageButton.svelte';
+	import ModelStlExporter from '$lib/exporter/components/ModelStlExporter.svelte';
+	import { globalGenerator } from '$lib/generation/util/global-generator-util';
+	import AddToPackageButton from '$lib/input/package/components/AddToPackageButton.svelte';
 	import SchemaBasedUserInput from '$lib/input/SchemaBasedUserInput.svelte';
 	import { type LabelDefinition } from '$lib/input/schemas/general-schemas';
+	import { getFonts, loadFonts } from '$lib/shared/font-store.svelte';
 	import { safeParseFromBase64, USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 	import ModelViewer from '$lib/viewer/ModelViewer.svelte';
 	import { onMount } from 'svelte';
 
-	let fonts = $state<Fonts | null>(null);
 	let loading = $state<boolean>(true);
 
 	const userInput: LabelDefinition = $derived.by(() => {
-		const param = $page.url.searchParams.get(USER_INPUT_PARAM_NAME);
+		const param = $page.url.searchParams.get(USER_INPUT_PARAM_NAME); //TODO fix deprecated
 		return safeParseFromBase64<LabelDefinition>(param) ?? ({} as LabelDefinition);
 	});
 
 	onMount(async () => {
-		const [regular, bold, extraBold] = await Promise.all([
-			loadOverpassRegularFont(),
-			loadOverpassBoldFont(),
-			loadOverpassExtraBoldFont()
-		]);
-
-		fonts = { regular, bold, extraBold };
+		await loadFonts();
 		loading = false;
 	});
 
-	const generator = new LabelGenerator();
 	const generationResult = $derived.by(() => {
+		const fonts = getFonts();
 		if (!fonts) {
 			return null;
 		}
 
-		return generator.generate(userInput, fonts);
+		return globalGenerator.generate(userInput, fonts);
 	});
 
 	const handleFormChange = (updatedUserInput: LabelDefinition) => {

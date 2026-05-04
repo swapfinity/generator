@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { PackageCheck, PackagePlus } from 'lucide-svelte';
-	import type { LabelDefinition } from '../schemas/general-schemas';
-	import { packageStore } from './package.svelte';
+	import type { LabelDefinition } from '../../schemas/general-schemas';
+	import { packageStore } from '../package.svelte';
 
 	// props
 	interface AddToPackageButtonProps {

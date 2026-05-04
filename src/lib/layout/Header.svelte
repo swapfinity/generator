@@ -1,5 +1,5 @@
 <script>
-	import PackageDrawer from '$lib/input/package/PackageDrawer.svelte';
+	import PackageDrawer from '$lib/input/package/components/PackageDrawer.svelte';
 </script>
 
 <div class="header-container bottom-divider">

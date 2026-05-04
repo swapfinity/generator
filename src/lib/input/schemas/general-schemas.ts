@@ -10,7 +10,11 @@ export const LABEL_SCHEMA_MAP: Record<LabelType, LabelSchemaEntry> = {
         schema: ScrewLabelSchema,
         nameTemplate: "screw_label{screwType|prefix:_}{screwMainText|prefix:_}{screwDrive|prefix:_}{screwDriveText|prefix:_}"
     },
-    'CUSTOMIZABLE_TEXT': { displayName: 'Customizable Text Label', schema: CustomizableTextLabelSchema },
+    'CUSTOMIZABLE_TEXT': {
+        displayName: 'Customizable Text Label',
+        schema: CustomizableTextLabelSchema,
+        nameTemplate: "text_label{firstLine|prefix:__}{secondLine|prefix:__}"
+    },
 };
 
 export const LabelDefinitionSchema = z.discriminatedUnion("type", [ScrewLabelSchema, CustomizableTextLabelSchema]);

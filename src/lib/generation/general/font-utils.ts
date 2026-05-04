@@ -98,7 +98,9 @@ function polygonFromPoints(paths: [number, number][][]): Geom2 {
 }
 
 export const loadFont = async (fontUrl: string): Promise<opentype.Font> => {
-    return opentype.load(fontUrl);
+    const response = await fetch(fontUrl);
+    const buffer = await response.arrayBuffer();
+    return opentype.parse(buffer);
 }
 
 export const loadOverpassRegularFont = async (): Promise<opentype.Font> => {

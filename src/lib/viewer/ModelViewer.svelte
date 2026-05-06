@@ -1,8 +1,7 @@
 <script lang="ts">
 	import * as jscad from '@jscad/modeling';
-	const { measurements, booleans } = jscad;
+	const { measurements } = jscad;
 
-	import type { Geom3 } from '@jscad/modeling/src/geometries/types';
 	import { onDestroy, onMount } from 'svelte';
 	import { Focus } from 'lucide-svelte';
 	import type { GenerationResult } from '$lib/generation/types/generation-result';

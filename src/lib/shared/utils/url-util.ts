@@ -1,3 +1,6 @@
+export const USER_INPUT_PARAM_NAME = 'input';
+
+
 export const safeParseFromBase64 = <T>(param: string | null | undefined): T | undefined => {
     if (!param) {
         return undefined;

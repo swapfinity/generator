@@ -75,7 +75,7 @@
 			</div>
 		</div>
 		<div class="drawer-footer">
-			<PackageStlExporter />
+			<div style:flex="1"><PackageStlExporter /></div>
 			<ClearPackageButton />
 		</div>
 	</div>
@@ -113,7 +113,7 @@
 		top: 0;
 		right: 0;
 		height: 100%;
-		width: 768px;
+		width: min(768px, 100vw);
 		background: var(--pico-background-color);
 		z-index: 11;
 		display: flex;
@@ -145,6 +145,7 @@
 		margin-top: calc(var(--pico-spacing) * 2);
 		display: flex;
 		gap: var(--pico-spacing);
+		flex-wrap: wrap;
 	}
 
 	.package-table {
@@ -159,6 +160,12 @@
 
 		td:first-child {
 			width: 2rem;
+		}
+
+		@media (max-width: 768px) {
+			td:first-child {
+				display: none;
+			}
 		}
 
 		td:last-child {

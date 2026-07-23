@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { LabelDefinition } from '$lib/input/schemas/general-schemas';
 	import { FileBox } from 'lucide-svelte';
 	import { USER_INPUT_PARAM_NAME } from '../utils/url-util';
@@ -11,7 +12,7 @@
 		baseEditorPath?: string;
 		action?: () => void;
 	}
-	let { label, baseEditorPath = '/', action }: Props = $props();
+	let { label, baseEditorPath = resolve('/'), action }: Props = $props();
 
 	const openInEditor = (labelDefinition: LabelDefinition) => {
 		const encoded = btoa(JSON.stringify(labelDefinition));

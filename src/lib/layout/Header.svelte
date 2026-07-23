@@ -1,6 +1,7 @@
 <script>
 	import PackageDrawer from '$lib/input/package/components/PackageDrawer.svelte';
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 </script>
 
 <div class="header-container bottom-divider">
@@ -10,8 +11,8 @@
 			<ul>
 				<li>
 					<a
-						href="/"
-						aria-current={page.url.pathname === '/' ? 'page' : undefined}
+						href={resolve('/')}
+						aria-current={page.url.pathname === resolve('/') ? 'page' : undefined}
 						class="nav-element"
 					>
 						Generator
@@ -19,8 +20,10 @@
 				</li>
 				<li>
 					<a
-						href="/templates"
-						aria-current={page.url.pathname === '/templates/' ? 'page' : undefined}
+						href={resolve('/templates')}
+						aria-current={page.url.pathname === `${resolve('/templates')}/`
+							? 'page'
+							: undefined}
 						class="nav-element"
 					>
 						Templates

@@ -1,10 +1,7 @@
 <script lang="ts">
-	import { FileBox, Package, PackageOpen, Trash, X } from 'lucide-svelte';
+	import { Package, PackageOpen, Trash, X } from 'lucide-svelte';
 	import { packageStore } from '../package.svelte';
 	import { fly } from 'svelte/transition';
-	import type { LabelDefinition } from '../../schemas/general-schemas';
-	import { goto } from '$app/navigation';
-	import { USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 	import PackageStlExporter from '$lib/exporter/components/PackageStlExporter.svelte';
 	import ClearPackageButton from './ClearPackageButton.svelte';
 	import OpenInEditorButton from '$lib/shared/components/OpenInEditorButton.svelte';
@@ -17,16 +14,6 @@
 
 	const closeDrawer = () => {
 		isOpen = false;
-	};
-
-	const openInEditor = (labelDefinition: LabelDefinition) => {
-		const encoded = btoa(JSON.stringify(labelDefinition));
-		closeDrawer();
-		goto(`/?${USER_INPUT_PARAM_NAME}=${encoded}`, {
-			replaceState: true,
-			noScroll: true,
-			keepFocus: true
-		});
 	};
 </script>
 

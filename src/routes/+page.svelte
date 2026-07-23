@@ -78,7 +78,6 @@
 	.sidebar {
 		flex: 1 1 768px;
 		padding: var(--pico-spacing) 0;
-		overflow-y: auto;
 		margin-right: var(--pico-spacing);
 		display: flex;
 		flex-direction: column;

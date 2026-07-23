@@ -7,6 +7,7 @@
 	import { USER_INPUT_PARAM_NAME } from '$lib/shared/utils/url-util';
 	import PackageStlExporter from '$lib/exporter/components/PackageStlExporter.svelte';
 	import ClearPackageButton from './ClearPackageButton.svelte';
+	import OpenInEditorButton from '$lib/shared/components/OpenInEditorButton.svelte';
 
 	let isOpen = $state(false);
 
@@ -21,7 +22,7 @@
 	const openInEditor = (labelDefinition: LabelDefinition) => {
 		const encoded = btoa(JSON.stringify(labelDefinition));
 		closeDrawer();
-		goto(`?${USER_INPUT_PARAM_NAME}=${encoded}`, {
+		goto(`/?${USER_INPUT_PARAM_NAME}=${encoded}`, {
 			replaceState: true,
 			noScroll: true,
 			keepFocus: true
@@ -60,9 +61,7 @@
 									<td><strong>{i + 1}</strong></td>
 									<td>{filename}</td>
 									<td class="action-container">
-										<button class="icon-button" onclick={() => openInEditor(label)}>
-											<FileBox />
-										</button>
+										<OpenInEditorButton {label} action={closeDrawer} />
 										<button class="icon-button" onclick={() => packageStore.remove(i)}>
 											<Trash />
 										</button>
@@ -153,7 +152,7 @@
 		border-collapse: collapse;
 
 		td {
-			padding: 0.5rem 0;
+			padding: 0.5rem;
 			border-bottom: 1px solid var(--pico-muted-border-color);
 			vertical-align: middle;
 		}
@@ -166,6 +165,10 @@
 			td:first-child {
 				display: none;
 			}
+		}
+
+		td:nth-child(2) {
+			width: 100%;
 		}
 
 		td:last-child {

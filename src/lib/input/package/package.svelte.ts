@@ -47,11 +47,26 @@ class Package {
         return this.labels.some(existing => isDeepEqual(existing, label));
     }
 
+    containsAll = (labels: LabelDefinition[]): boolean => {
+        return labels.every(label => this.contains(label));
+    }
+
     add = (label: LabelDefinition | null): void => {
         if (!label || this.labels.length >= this.maxSize || this.contains(label)) {
             return;
         }
         this.labels.unshift(label);
+        this.save();
+    }
+
+    addAll = (labels: LabelDefinition[]): void => {
+        const toAdd = labels.filter(label => !this.contains(label));
+
+        if (toAdd.length === 0 || !this.mayAddAmount(toAdd.length)) {
+            return;
+        }
+
+        this.labels.unshift(...toAdd);
         this.save();
     }
 
@@ -79,6 +94,10 @@ class Package {
 
     get isEmpty(): boolean {
         return this.count <= 0;
+    }
+
+    mayAddAmount(numberOfElements: number): boolean {
+        return (this.labels.length + numberOfElements) <= this.maxSize;
     }
 
     private save(): void {

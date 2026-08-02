@@ -267,7 +267,7 @@
 			class="time-spent-display"
 			data-tooltip={hover.present ? 'Time spent for generation' : undefined}
 		>
-			{generationResult.timeSpent < 1 ? '<1' : generationResult.timeSpent} ms
+			{generationResult.timeSpent < 1 ? '<1' : Number(generationResult.timeSpent.toFixed(1))} ms
 		</div>
 	{/if}
 	<button class="reset-view-button icon-button" onclick={fitCameraToGeometry}>
